@@ -562,7 +562,7 @@ var discoverDoc = {
             id: 1
         },
         {
-            content: "Ce document permet de saisir rapidement le fonctionnement de l’application. Clique sur >HTML en haut de la page et tu auras un aperçu HTML de ce qui est saisi ici.",
+            content: "Ce document permet de saisir rapidement le fonctionnement de l’application. Ici se trouve l'éditeur. C'est là que l'on écrit du texte qui est converti en HTML lorsque l'on clique sur HTML (en haut de page). La syntaxe permet de créer des titres, des paragraphes, des listes, des citations, etc. Elle permet également l'insertion de gras, d'italique, de liens, etc. C'est ce que nous allons voir dans ce document. Une documentation sera mise en place prochainement. (note : la suite de ce document est actuellement en cours de réécriture, car le fonctionnement et l'interface du logiciel ont changé récemment.)",
             id: 2
         },
         {
@@ -658,9 +658,9 @@ var discoverDoc = {
             id: 29
         }
     ],
-    name: "Megunouille t1",
-    title: "L’incroyable aventure de Megumi",
-    author: "Akemi",
+    name: "Discover",
+    title: "Mountale first document",
+    author: "Sven Seitan",
     uuid: generateUUID()
 };
 
