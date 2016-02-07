@@ -1,136 +1,46 @@
+<!--
+    Copyright 2016 - Sven Seitan
+    
+    This file is part of Mountale.
+
+    Mountale is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Mountale is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Mountale.  If not, see <http://www.gnu.org/licenses/>.
+-->
 <!doctype html>
 <html>
 
     <head>
-        <title>Composer Brut</title>
+        <title>Mountale</title>
         <meta charset=utf-8>
         <link rel="shortcut icon" href="core/favicon.ico">
-        <style>
-            *::selection {
-              background: #333;
-              color: #fff;
-            }
-            * {box-sizing: border-box; }
-            body {padding: 20px; margin: 0 auto; width: 100%; max-width: 650px; background: #eee; color: #222; font-family: georgia, serif;}
-
-            #htmlPreview mark {background-color: #D49AFF;}
-            #htmlPreview p {text-indent: 1em; text-align: justify; line-height: 1.4em;}
-            #htmlPreview p.poem {text-indent: 0;}
-            #htmlPreview p.disc_alpha {margin-bottom: 0;}
-            #htmlPreview p.disc_inter {margin-top: 0; margin-bottom: 0;}
-            #htmlPreview p.disc_omega {margin-top: 0;}
-            #htmlPreview h1, h2, h3, h4, h5, h6 {text-align: center;}
-            #htmlPreview a {color: purple; cursor: pointer;}
-            #htmlPreview a:hover{color: #000;}
-            #htmlPreview hr {
-        		height: 40px;
-        		background: url(core/hr.svg) no-repeat center !important;
-        		border: none !important;
-        	}
-            
-            #htmlPreview blockquote {
-                border-left: 5px solid #C7CACC;
-                padding: 0px 15px;
-                margin-left: 15px;
-                margin-right: 0;
-            }
-            #htmlPreview blockquote footer {
-                margin: 0;
-                background: #C7CACC;
-                padding: 4px 10px 4px 10px;
-                display: inline-block;
-            }
-            #htmlPreview figure {
-                font-size: .85em;
-                text-align: center;
-                margin: 0;
-            }
-            #htmlPreview figure img {width: 100%;}
-            #htmlPreview sup a { text-decoration: none; }
-            /*
-            pre code {
-                background: none;
-                border: none;
-            }*/
-            img {
-                width: 33%;
-            }
-            img.imgLeft {
-                float: left !important;
-                padding: 5px 10px 5px 0 !important;
-            }
-            img.imgRight {
-                float: right !important;
-                padding: 5px 0 5px 10px !important;
-            }
-            
-            nav {
-                color: #000;
-                font-family: monospace, sans-serif;
-                font-size: .9em;
-                font-weight: bold;
-                margin-bottom: 50px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid;
-            }
-            .bt::before {content:'>';}
-            .bt {padding-right: 15px; cursor: pointer;}
-            .bt:hover {color: purple;}
-
-            #compose {font-family: monospace, sans-serif; outline: none;}
-            #htmlPreview {font-size: 1.2em;}
-            #htmlSource {font-family: monospace, sans-serif; font-size: .9em;}
-            
-            .options {
-                border: 1px solid;
-                padding: 10px;
-                margin-bottom: 50px;
-            }
-            
-            .btDocOption {
-                background: #ccc;
-                color: #000;
-                padding: 4px 8px;
-                margin: 10px 5px 10px 0;
-                display: inline-block;
-                text-decoration: none;
-            }
-            .btDocOption:hover {
-                background: #000;
-                color: #fff;
-            }
-            
-            #pageName {
-                font-weight: normal;
-                color: #666;
-                font-style: italic;
-                display: block;
-                margin-top: 5px;
-            }
-            
-            #sourceContent {
-                font-family: monospace,  sans-serif; font-size: .8em;
-            }
-        </style>
+        <link href="core/base.css" rel="stylesheet" title="Base">
     </head>
 
     <body>
 
         <!--navbars-->
-        
         <nav id=nav>
-            
             <span class=bt id=btFiles>FILES</span>
             <span class=bt id=btSource>SOURCE</span>
             <span class=bt id=btHtml>HTML</span>
-            <span class=bt id=btCompose>COMPOSER</span>
-            <span class=bt id=btToggleSourcePreview></span>
+            <span class=bt id=btCompose style="display:none;">COMPOSER</span>
+            <span class=bt id=btToggleSourcePreview style="display:none;"></span>
             <br><span id=pageName>Composer</span>
         </nav>
 
         <!--contents-->
         <div id=compose contenteditable></div>
-        <div id=files>
+        <div id=files style="display:none;">
             <p>
                 <label for=inputDocName>New file : </label>
                 <input id=inputDocName type=text placeholder=Name />
@@ -143,8 +53,8 @@
             <hr>
             <div id=listOfDocs></div>
         </div>
-        <div id=htmlPreview></div>
-        <div id=htmlSource>
+        <div id=htmlPreview style="display:none;"></div>
+        <div id=htmlSource style="display:none;">
             <div class=options>
                 <label for=htmlOptsPrefix>Id's prefix&nbsp;:</label>
                 <input id=htmlOptsPrefix type=text value="block">
@@ -157,7 +67,7 @@
             </div>
             <div id=htmlSourceContent contenteditable></div>
         </div>
-        <div id=source>
+        <div id=source style="display:none;">
             <p><button id=btExportTale>Save source file</button> or copy &amp; paste this code in an empty file named&nbsp;: "doc_name.tale".</p>
             <div id=sourceContent contenteditable></div>
         </div>
