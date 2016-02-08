@@ -71,7 +71,7 @@ h6 {
 }
 #htmlPreview hr {
     height: 40px;
-    background: url(core/hr.svg) no-repeat center !important;
+    background: url(hr.svg) no-repeat center !important;
     border: none !important;
 }
 #htmlPreview blockquote {

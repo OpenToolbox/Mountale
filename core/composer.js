@@ -205,7 +205,11 @@ function generateHTML() {
     }
 
     // chaque bloc du DOM permet d'en créer un nouveau (avec les bons attributs) pour l'insèrer dans un tableau
-    for (node of nodes) {
+    nb = nodes.length;
+    
+    //for (node of nodes) { //ES6
+    for (i = 0; i < nb; i++) {
+        node = nodes[i];
         block = document.createElement(node.tagName);
         block.innerHTML = node.innerHTML;
         if (node.classList && node.classList.contains('poem')) {
@@ -216,7 +220,6 @@ function generateHTML() {
     }
 
     // footnotes in blocks
-    nb = nodes.length;
     for (i = 0; i < nb; i++) {
         block = article.childNodes.item(i);
         notes = block.querySelectorAll('[data-cite]');
@@ -396,7 +399,6 @@ function caretNodes() {
     }
 
     if (nodeDeb === nodeEnd) {
-        console.log("ici");
         return [nodeDeb];
     }
     
@@ -418,13 +420,12 @@ function caretNodes() {
     }
     
     for (i = 0, nb = blocks.length; i < nb; i++) {
-        el = blocks[i];
-
+        el = parseInt(blocks[i]);
         if (el === idDeb) {
             nodes.push(document.getElementById(el));
             i++;
             for (i; i < nb; i++) {
-                el = blocks[i];
+                el = parseInt(blocks[i]);
                 nodes.push(document.getElementById(el));
                 if (el === idEnd) {
                     break;
@@ -433,7 +434,6 @@ function caretNodes() {
             break;
         }
     }
-    console.log(nodes);
     return nodes;
 }
 
@@ -1224,7 +1224,9 @@ app.btHtml.addEventListener('click', function () {
     app.pageName.innerHTML = app.inHtmlPreview.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
     
     app.inHtmlPreview.content.innerHTML = '';
-    for (block of blocks) {
+    //for (block of blocks) { //ES6
+    for (var i = 0, nb = blocks.length; i < nb; i++) {
+        block = blocks[i];
         app.inHtmlPreview.content.appendChild(convert.toHTML(block));
     }
     
@@ -1414,7 +1416,9 @@ app.compose.addEventListener('keypress', function (e) {
             // change currentBlock
             app.currentBlock = [app.currentBlock[nb - 1]];
             // LS
-            for (blk of app.compose.childNodes) {
+            //for (blk of app.compose.childNodes) { //ES6
+            for (var i = 0, nb = app.compose.childNodes.length; i < nb; i++) {
+                blk = app.compose.childNodes[i];
                 if (blk.textContent.trim() !== '') {
                     node = {
                         content: blk.innerHTML,
@@ -1433,7 +1437,6 @@ app.compose.addEventListener('keypress', function (e) {
         if (blk.textContent.trim() === '') { // noeud vide : il faut le remplir pour créer un nouveau noeud
             e.preventDefault();
         } else { // création d'un nouveau noeud (bloc)
-            console.log("newblock");
             caret = caretInfos(blk);
             uuid = JSON.parse(localStorage.getItem('docs'))[0];
             idMax = localStorage.getItem(uuid + '.idMax');
@@ -1449,7 +1452,6 @@ app.compose.addEventListener('keypress', function (e) {
                 sel.collapse(newBlk, 1);
 
             } else if (caret && caret.start === caret.end && caret.isEnd === true) { // curseur à la fin du bloc
-                console.log("fin de bloc : ", blk, newBlk, nextBlk);
                 blk.parentNode.insertBefore(newBlk, nextBlk);
                 sel.collapse(newBlk, 1);
 
@@ -1475,7 +1477,9 @@ app.compose.addEventListener('input', function () {
     //save
     var uuid, node, blocks = [], blk;
     uuid = JSON.parse(localStorage.getItem('docs'))[0];
-    for (blk of app.compose.childNodes) {
+    //for (blk of app.compose.childNodes) { //ES6
+    for (var i = 0, nb = app.compose.childNodes.length; i < nb; i++) {
+        blk = app.compose.childNodes[i];
         node = {
             content: blk.innerHTML,
             id: blk.id
@@ -1526,7 +1530,7 @@ app.btExportTale.addEventListener('click', saveTextAsFile, false);
 
 /* Init. app */
 
-//localStorage.clear();
+localStorage.clear();
 app.btCompose.click();
 
 
