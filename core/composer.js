@@ -1532,17 +1532,3 @@ app.btExportTale.addEventListener('click', saveTextAsFile, false);
 
 localStorage.clear();
 app.btCompose.click();
-
-
-/* TODO
-    ok - apostrophe typo et autres avec convert.toJSON (3fev)
-        → clic ailleurs que dans un bloc doit fonctionner
-    - nettoyage max (5fev)
-        → l'uuid du document pourrait etre mémorisé dans une variable pour ne pa retourner le chercher dans le ls à chaque fois
-        → bien commenter
-    - test sur autres navigateurs (5fev)
-        → fonctionnne sur chrome et firefox. Un problème sur Opera à régler
-    - GITHUB V0.5 AGPLv3 (6-7fev) 
-        + documentation
-        + discover doc
-*/
