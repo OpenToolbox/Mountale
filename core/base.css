@@ -25,7 +25,7 @@
     box-sizing: border-box;
 }
 body {
-    padding: 20px;
+    padding: 40px;
     margin: 0 auto;
     width: 100%;
     max-width: 650px;
@@ -97,6 +97,29 @@ h6 {
 #htmlPreview sup a {
     text-decoration: none;
 }
+
+#htmlPreview table {
+    border-collapse: collapse;
+}
+
+#htmlPreview th {
+    background: #CCC;
+    border: 1px solid black;
+    padding: 20px;
+}
+
+#htmlPreview tr:nth-child(odd) {
+    background: #E4E5EA;
+}
+
+#htmlPreview td {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: center;
+}
+
+
+
 /*
 pre code {
     background: none;
@@ -174,10 +197,30 @@ nav {
 }
 #topNav {
     margin-bottom: 30px;
+    display: inline;
+}
+header {
+    margin-bottom: 20px;
+}
+header h1{
+    display: inline-block;
+    font-family: monospace, sans-serif;
+    font-size: 1.2em;
+    color: #fff;
+    background: #000;
+    padding: 2px 4px 0 5px;
+    box-shadow: 4px 4px 0 #ccc;
+    margin-right: 10px;
+}
+header h1 span {
+    font-size: .6em;
+    font-weight: 400;
+    color: #999;
 }
 #topNav a {
     text-decoration: none;
-    color: #000;
+    color: #999;
+    padding-left: 5px;
 }
 #topNav a:hover {
     color: purple;

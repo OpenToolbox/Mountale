@@ -22,6 +22,7 @@
 /*jslint plusplus: true*/
 /*jshint esnext: true, strict: true*/
 var app = {
+    currentDoc: JSON.parse(localStorage.getItem('docs')),
     currentBlock: [],
     
     //contents
@@ -56,6 +57,7 @@ var app = {
 
     //keys
     ENTER_KEY: 13,
+    TAB_KEY: 9,
 
     //markers
     MARKERS: [
@@ -108,6 +110,9 @@ var app = {
     HTML_SOURCE: 'HTML_CODE',
     HTML_RENDER: 'HTML_RENDER'
 };
+if (app.currentDoc) {
+    app.currentDoc = app.currentDoc[0];
+}
 
 /* All functions */
 
@@ -135,6 +140,7 @@ function setDoc(doc) {
         }
     }
     localStorage.setItem(doc.uuid + '.idMax', idMax);
+    app.currentDoc = doc.uuid;
 }
 
 function generateUUID() {
@@ -272,12 +278,12 @@ function generateHTML() {
 function generateSource() {
     'use strict';
     var
-        uuid = JSON.parse(localStorage.getItem('docs'))[0],
+        uuid = app.currentDoc,
         doc,
         title = localStorage.getItem(uuid + '.title'),
         author = localStorage.getItem(uuid + '.author'),
         blocks = JSON.parse(localStorage.getItem(uuid + '.blocks'));
-    
+    console.log(uuid, localStorage.getItem(uuid + '.blocks'));
     blocks = blocks.map(function (blk) {
         return {id: blk.id, content: blk.content};
     });
@@ -403,7 +409,7 @@ function caretNodes() {
     }
     
     
-    uuid = JSON.parse(localStorage.getItem('docs'))[0];
+    uuid = app.currentDoc;
     blocks = JSON.parse(localStorage.getItem(uuid + '.blocks'));
     blocks = blocks.map(function (block) {
         return block.id;
@@ -506,7 +512,7 @@ function saveTextAsFile() {
     //  create a new Blob (html5 magic) that contains the data from your form feild
     var textFileAsBlob = new Blob([textToWrite], {type:'application/json'});
     // Specify the name of the file to be saved
-    var fileNameToSaveAs = localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name') + '.tale';
+    var fileNameToSaveAs = localStorage.getItem(app.currentDoc + '.name') + '.tale';
 
     // Optionally allow the user to choose a file name by providing 
     // an imput field in the HTML and using the collected data here
@@ -578,108 +584,172 @@ function handleFiles() {
 var discoverDoc = {
     blocks: [
         {
-            content: "= Découverte de Mountale",
-            id: 1
+            id: 1,
+            content: "= Bienvenue sur Mountale"
         },
         {
-            content: "Ce document permet de saisir rapidement le fonctionnement de l’application. Ici se trouve l'éditeur. C'est là que l'on écrit du texte qui est converti en HTML lorsque l'on clique sur HTML (en haut de page). La syntaxe permet de créer des titres, des paragraphes, des listes, des citations, etc. Elle permet également l'insertion de gras, d'italique, de liens, etc. C'est ce que nous allons voir dans ce document. Une documentation sera mise en place prochainement. (note : la suite de ce document est actuellement en cours de réécriture, car le fonctionnement et l'interface du logiciel ont changé récemment.)",
-            id: 2
+            id: 2,
+            content: "Mountale permet d'écrire du texte de façon simple et d'en récupérer le HTML pour l'insérer, par exemple, sur un blog. Ce document permet de faire un tour rapide du fonctionnement de l'application."
         },
         {
-            content: "== Les blocs d’écriture",
-            id: 3
+            id: 3,
+            content: "== Interface"
         },
         {
-            content: "=== Les titres",
-            id: 4
+            id: 4,
+            content: "En haut de page se trouve le nom de l'application \"Mountale\", accompagné d'un numéro de version. Tant que la version est inférieure à 1.0, c'est que Mountale est en version beta. Juste à gauche se trouve deux icônes. La première permet d'accéder au code source (car Mountale est entièrement open source) et la seconde permet d'accéder à une documentation plus complète que celle de ce document."
         },
         {
-            content: "Ils disposent de 1 à 6 symboles =.",
-            id: 9
+            id: 5,
+            content: "Un menu se tient juste sous le nom de l'application. Il permet d'accéder à la gestion des documents (Files), à l'enregistrement du fichier (Source), à l'aperçu en HTML (HTML), etc."
         },
         {
-            content: "=== Le dialogue",
-            id: 10
+            id: 6,
+            content: "Sous ce menu se trouve la section dans laquelle nous sommes, aintion \"Composer\", il est possible de modifier ce texte en cliquant dessus. Un curseur apparaît. Essaye :)szez"
         },
         {
-            content: "- Salut Jack !<br>- Salut John. T’as fait quoi hier ?",
-            id: 11
+            id: 7,
+            content: "== Enregistrement du document"
         },
         {
-            content: "=== La liste",
-            id: 12
+            id: 8,
+            content: "La sauvegarde se fait automatiquement dans le navigateur même (localStorage pour les connaisseurs). Il reste donc en mémoire dans le cache du navigateur et ne peut donc être visible que par son créateur. Si le cache est vidé, alors tous les documents créés seront supprimés. C'est pourquoi à partir du menu, >SOURCE permet d'enregistrer le document en .tale sur son ordinateur (ou tablette, ou smartphone). Dans >FILES, il sera importable afin de pouvoir s'en servir à nouveau."
         },
         {
-            content: "* capucin<br>* mandrill<br>* orang-outan",
-            id: 13
+            id: 10,
+            content: "== Langage du Composer"
         },
         {
-            content: "Autre exemple :",
-            id: 14
+            id: 11,
+            content: "On peut remarquer que des \"=\" se trouvent devant les titres et que les paragraphes s'écrivent sans symboles particuliers. Il y a un marquage spécial pour chaque type de bloc de texte et un autre pour le texte lui-même. Nous allons tout voir dans la suite."
         },
         {
-            content: "* fruits<br>1** bananes<br>** figues<br>** ananas<br>* légumes<br>1** courgettes<br>** navets",
-            id: 15
+            id: 12,
+            content: "=== Titre"
         },
         {
-            content: "=== Le saut",
-            id: 16
+            id: 13,
+            content: "Le titre commence par un à six symboles \"=\". Le nombre dépend du niveau et on commence par le niveau 1."
         },
         {
-            content: "---",
-            id: 17
+            id: 14,
+            content: "=== Paragraphe"
         },
         {
-            content: "=== La citation",
-            id: 18
+            id: 15,
+            content: "Il ne contient aucun symbole particulier étant donné que c'est le type de bloc qui est le plus utilisé."
         },
         {
-            content: "> Fight Club<br>C’est seulement quand on a tout perdu qu’on est libre de faire tout ce qu’on veut.<br><",
-            id: 19
+            id: 16,
+            content: "=== Dialogue"
         },
         {
-            content: "=== La figure",
-            id: 20
+            id: 17,
+            content: "Chaque réplique s'introduit par un symbole \"-\" (moins). Comme ceci :"
         },
         {
-            content: "! Légende de l’image<br>{{image d’une personne qui clique sur son ordinateur|https://pixabay.com/static/uploads/photo/2015/07/28/22/04/woman-865111_960_720.jpg}}",
-            id: 21
+            id: 18,
+            content: "- Salut Jack !<br>- Yo John."
         },
         {
-            content: "== Le texte",
-            id: 22
+            id: 19,
+            content: "On peut remarquer qu'entre les deux répliques il n'y a pas de saut de ligne. Pour ce faire, en fin de réplique, il faut appuyer simultanément sur Shift (ou Maj) + Entrée."
         },
         {
-            content: "Il est possible d’insérer des marques au sein du texte afin d’obtenir du gras, de l’italique, des liens, des notes de bas de page, etc. Le bloc qui suit contient tous les marquages possibles.",
-            id: 23
+            id: 20,
+            content: "=== Pause"
         },
         {
-            content: "Voici une image flottante à gauche {{alt|25|l|https://pixabay.com/static/uploads/photo/2015/07/28/22/04/woman-865111_960_720.jpg}}, du **gras**, de l’''italique'', du ||texte surligné||, du ``code informatique``, un ^^exposant^^ et un ,,indice,,, une note((Texte de la note)) de bas de page, un [[lien|http://www.google.fr]] et pour finir, du __texte souligné__. Pour plus de détails et savoir quand se servir de telle ou telle marque, il faut consulter la documentation.",
-            id: 24
+            id: 21,
+            content: "Marquer la séparation entre deux blocs de texte se fait avec \"---\" (trois signes moins), comme ceci :"
         },
         {
-            content: "Il se peut que l’on souhaite afficher, par exemple, des paires d’étoiles autour d’un mot sans le mettre en gras, ou afficher un texte entouré de deux parenthèses sans que cela ne devienne une note. Voici comment faire :",
-            id: 25
+            id: 22,
+            content: "---"
         },
         {
-            content: "Ceci n’est \\**pas en gras\\** et cela n’est \\((pas une note)).",
-            id: 26
+            id: 23,
+            content: "=== Liste"
         },
         {
-            content: "Enfin, certains caractères ou ensemble de caractères se convertissent automatiquement (lorsque le bloc passe en mode aperçu). C’est le cas de « ~~'~~ » qui se transforme en apostrophe typographique et de « ~~...~~ » qui se transforme en vrais points de suspension. Les espaces se convertissent également en espaces insécables lorsque cela est nécessaire. Pour empêcher cette conversion, il convient d’envelopper de « ~ » (tilde), le caractère ou l’ensemble de caractères que l’on ne souhaite pas convertir.",
-            id: 27
+            id: 24,
+            content: "Chaque élément de liste s'introduit par \"*\" (étoile ou astérisque). Selon le niveau d'imbrication d'une liste, il y aura une ou plusieurs étoiles. Placer un \"1\" devant une étoile permet de changer les éléments du même niveau de liste en liste ordonnée. Enfin, pour le moment, il n'est possible d'imbriquer les listes que sur un niveau. Voici une liste simple :"
         },
         {
-            content: "---",
-            id: 28
+            id: 25,
+            content: "* Macaque<br>* Orang-outang<br>* Banane"
         },
         {
-            content: "Il est utile de conserver ce document pour y dégoter une information oubliée. Pour créer ton premier document, clique sur l’onglet en haut à gauche qui représente deux pages l’une sur l’autre, insère un nom et c’est parti. Bonne rédaction !",
-            id: 29
-        }
-    ],
-    name: "Discover",
-    title: "Mountale first document",
+            id: 26,
+            content: "Et plus complexe :"
+        },
+        {
+            id: 27,
+            content: "* Légumes<br>1** Carottes<br>** Choux<br>** Salades<br>* Fruits<br>1** Pommes<br>** Coings"
+        },
+        {
+            id: 28,
+            content: "=== Tableau"
+        },
+        {
+            id: 29,
+            content: "Il se présente sous cette forme :"
+        },
+        {
+            id: 30,
+            content: "!! Titre 1    !! Titre 2    !!<br>|| Élément a  || 50         ||<br>|| Élément b  || 40,5       ||<br>|| Élément c  || inconnu    ||<br>|| Élément d  || 48,3       ||"
+        },
+        {
+            id: 36,
+            content: "=== Figure"
+        },
+        {
+            id: 37,
+            content: "La figure début par \"!\", suivi d'une légende. À la ligne se trouve une ou plusieurs images. Comme ceci :"
+        },
+        {
+            id: 38,
+            content: "! Ceci est une légende<br>{{texte alternatif|core/writer.jpg}}"
+        },
+        {
+            id: 31,
+            content: "=== Citation"
+        },
+        {
+            id: 32,
+            content: "La citation débute par \">\" et se termine par \"<\". La première ligne contient la source de la citation et les suivantes, son contenu (qui peut-être de n'importe quel type de bloc). Voici un exemple de citation simple :"
+        },
+        {
+            id: 33,
+            content: "> Jack<br>Le vent m'appelle.<br><"
+        },
+        {
+            id: 34,
+            content: "Et une citation qui contient, dans l'ordre, un titre, un paragraphe, une citation simple et un dernier paragraphe :"
+        },
+        {
+            id: 35,
+            content: "> Journal<br>= Ceci est un titre<br>Ceci est un paragraphe.<br>> Jack<br>Le vent m'appelle.<br><<br>Ceci est un dernier paragraphe.<br><"
+        },
+        {
+            id: 39,
+            content: "=== Texte"
+        },
+        {
+            id: 40,
+            content: "{{alt|l|core/writer.jpg}}À l'intérieur du texte de chaque bloc peuvent être insérées des marques permettant d'obtenir des images, du **gras**, de l'''italique'', des [[liens|http://test.com]], des notes de bas de pages((Ceci est le contenu de la note)), du texte ||surligné||, du texte __souligné__ et du ``code``."
+        },
+        {
+            id: 41,
+            content: "== Mots de la fin"
+        },
+        {
+            id: 42,
+            content: "Une documentation détaillée est disponible sur Github [[ici|https://github.com/svenseitan/svenseitan.github.io/blob/master/README.md]]. Le projet est en constante évolution. Pour celles et ceux qui ont à faire bien trop souvent au syndrôme de la page blanche, n'ayez crainte, celle-ci est grise ! Bonne écriture."
+        },
+    ],    
+    name: "Découverte (fr)",
+    title: "Découverte de Mountale",
     author: "Sven Seitan",
     uuid: generateUUID()
 };
@@ -1000,6 +1070,50 @@ var convert = {
             
             return node;
         }
+        
+        function to_table(block) {
+            var
+                node = document.createElement('table'),
+                tr, tt, thOrTd, elts,
+                content, lines, line, nb, nb1, i, j, legend, medias;
+            
+            if (block.innerHTML) {
+                content = block.innerHTML;
+                node.id = block.id;
+            } else {
+                content = block;
+            }
+            
+            lines = content.split('<br>');
+            nb = lines.length;
+            
+            for (i = 0; i < nb; i++) {
+                line = lines[i];
+                tr = document.createElement('tr');
+                
+                if (/^!!\s/.test(line)) {
+                    elts = line.split('!!');
+                    thOrTd = 'th';
+                } else {
+                    elts = line.split('||');
+                    thOrTd = 'td';
+                }
+                
+                elts = elts.filter(function(n){ return n != "" });
+                nb1 = elts.length;
+                console.log(elts);
+                for (j = 0; j < nb1; j++) {
+                    tt = document.createElement(thOrTd);
+                    tt.innerHTML = to_html(elts[j].trim());
+                    tr.appendChild(tt);
+                }
+
+                node.appendChild(tr);
+                
+            }
+            
+            return node;
+        }
 
         function to_cite(block) {
             var
@@ -1104,6 +1218,7 @@ var convert = {
             case firstChar === '-': return to_discuss(block);
             case firstChar === '=': return to_title(block);
             case /^&gt;\s/.test(content): return to_cite(block);
+            case /^[!|]{2}\s/.test(content): return to_table(block);
             case firstChar === '!': return to_figure(block);
             case /^1?\*{1}\s/.test(content): return to_list(block);
             default: return to_paragraph(block);
@@ -1221,7 +1336,7 @@ app.btHtml.addEventListener('click', function () {
         el.style.display = 'inline';
     }
     
-    app.pageName.innerHTML = app.inHtmlPreview.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
+    app.pageName.innerHTML = app.inHtmlPreview.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
     
     app.inHtmlPreview.content.innerHTML = '';
     //for (block of blocks) { //ES6
@@ -1249,7 +1364,7 @@ app.btSource.addEventListener('click', function () {
         el.style.display = 'inline';
     }
     
-    app.pageName.innerHTML = app.inSource.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
+    app.pageName.innerHTML = app.inSource.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
     
     app.sourceContent.textContent = generateSource();
     app.inSource.content.style.display = 'block';
@@ -1262,18 +1377,18 @@ app.btToggleSourcePreview.addEventListener('click', function () {
         bt.innerHTML = app.HTML_RENDER;
         app.htmlPreview.style.display = 'none';
         app.htmlSource.style.display = 'block';
-        app.pageName.innerHTML = app.inHtmlSource.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
+        app.pageName.innerHTML = app.inHtmlSource.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
         generateHTML();
     } else {
         bt.innerHTML = app.HTML_SOURCE;
         app.htmlSource.style.display = 'none';
         app.htmlPreview.style.display = 'block';
-        app.pageName.innerHTML = app.inHtmlPreview.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
+        app.pageName.innerHTML = app.inHtmlPreview.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
     }
 }, false);
 app.btCompose.addEventListener('click', function () {
     'use strict';
-    var el, block, node, docs, firstDocBlocks;
+    var el, block, node, firstDocBlocks, i, nb;
     
     //on masque nav et content
     for (el of app.allContentAndNav) {
@@ -1286,10 +1401,12 @@ app.btCompose.addEventListener('click', function () {
 
     // load doc
     app.inCompose.content.innerHTML = '';
-    docs = JSON.parse(localStorage.getItem('docs')) || [];
-    if (docs.length > 0) {
-        firstDocBlocks = JSON.parse(localStorage.getItem(docs[0] + '.blocks'));
-        for (block of firstDocBlocks) {
+    if (app.currentDoc) {
+        firstDocBlocks = JSON.parse(localStorage.getItem(app.currentDoc + '.blocks'));
+        //for (block of firstDocBlocks) { //ES6
+        nb = firstDocBlocks.length;
+        for (i = 0; i < nb; i++) {
+            block = firstDocBlocks[i];
             node = document.createElement('p');
             node.id = block.id;
             node.innerHTML = block.content;
@@ -1306,7 +1423,7 @@ app.btCompose.addEventListener('click', function () {
     }
     
     app.inCompose.content.style.display = 'block';
-    app.pageName.innerHTML = app.inCompose.name + ' (' + localStorage.getItem(JSON.parse(localStorage.getItem('docs'))[0] + '.name')  + ')';
+    app.pageName.innerHTML = app.inCompose.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
 }, false);
 app.btFiles.addEventListener('click', function () {
     'use strict';
@@ -1345,6 +1462,7 @@ app.btFiles.addEventListener('click', function () {
                 docs.splice(docs.indexOf(uuid), 1);
                 docs.unshift(uuid);
                 localStorage.setItem('docs', JSON.stringify(docs));
+                app.currentDoc = uuid;
                 app.btCompose.click();
             };
             div.appendChild(aEdit);
@@ -1364,6 +1482,7 @@ app.btFiles.addEventListener('click', function () {
                 localStorage.removeItem(uuid + '.title');
                 localStorage.removeItem(uuid + '.blocks');
                 localStorage.removeItem(uuid + '.author');
+                app.currentDoc = docs[0];
                 app.btFiles.click();
             };
             div.appendChild(aDelete);
@@ -1378,7 +1497,15 @@ app.btFiles.addEventListener('click', function () {
 }, false);
 
 /* app.compose events */
-
+app.compose.addEventListener('keydown', function (e) {
+    var
+        code = e.keyCode || e.which;
+    if (code === app.TAB_KEY) {
+        e.preventDefault();
+        /* par la suite, insérer 4 espaces à chaque appui en partant du bord et pas de la position
+        du curseur, bien que celle-ci joue un rôle (tab est pratique pour les tableaux) */
+    }
+}, false);
 app.compose.addEventListener('keypress', function (e) {
     'use strict';
     var
@@ -1393,14 +1520,14 @@ app.compose.addEventListener('keypress', function (e) {
         sel,
         idMax,
         uuid;
-
+    
     if (!e.shiftKey && code === app.ENTER_KEY) { // enter pressed
         
         sel = window.getSelection();
         var nb = app.currentBlock.length;
         if (nb > 1) { // more than one current block
             e.preventDefault();
-            uuid = JSON.parse(localStorage.getItem('docs'))[0];
+            uuid = app.currentDoc;
             // store content not selected in last block
             var firstContent = app.currentBlock[0].textContent.substring(0, sel.anchorOffset).trim();
             var lastContent = app.currentBlock[nb - 1].textContent.substring(sel.focusOffset).trim();
@@ -1438,7 +1565,7 @@ app.compose.addEventListener('keypress', function (e) {
             e.preventDefault();
         } else { // création d'un nouveau noeud (bloc)
             caret = caretInfos(blk);
-            uuid = JSON.parse(localStorage.getItem('docs'))[0];
+            uuid = app.currentDoc;
             idMax = localStorage.getItem(uuid + '.idMax');
             idMax ++;
             localStorage.setItem(uuid + '.idMax', idMax);
@@ -1476,7 +1603,7 @@ app.compose.addEventListener('input', function () {
     'use strict';
     //save
     var uuid, node, blocks = [], blk;
-    uuid = JSON.parse(localStorage.getItem('docs'))[0];
+    uuid = app.currentDoc;
     //for (blk of app.compose.childNodes) { //ES6
     for (var i = 0, nb = app.compose.childNodes.length; i < nb; i++) {
         blk = app.compose.childNodes[i];
