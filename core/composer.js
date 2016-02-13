@@ -1657,5 +1657,5 @@ app.btExportTale.addEventListener('click', saveTextAsFile, false);
 
 /* Init. app */
 
-localStorage.clear();
+//localStorage.clear();
 app.btCompose.click();
