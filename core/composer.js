@@ -45,6 +45,9 @@ var app = {
     btExportTale: document.getElementById('btExportTale'),
     sourceContent: document.getElementById('sourceContent'),
     
+    odt: document.getElementById('odt'),
+    btExportOdt: document.getElementById('btExportOdt'),
+    
     //navbars
     nav: document.getElementById('nav'), //inutilisé
     pageName: document.getElementById('pageName'),
@@ -54,10 +57,12 @@ var app = {
     btCompose: document.getElementById('btCompose'),
     btToggleSourcePreview: document.getElementById('btToggleSourcePreview'),
     btSource: document.getElementById('btSource'),
+    btOdt: document.getElementById('btOdt'),
 
     //keys
     ENTER_KEY: 13,
     TAB_KEY: 9,
+    RETURN_KEY: 8,
 
     //markers
     MARKERS: [
@@ -83,7 +88,7 @@ var app = {
     },
     inCompose: {
         content: compose,
-        nav: [btFiles, btSource, btHtml],
+        nav: [btFiles, btSource, btOdt, btHtml],
         name: 'Composer'
     },
     inHtmlPreview: {
@@ -101,9 +106,14 @@ var app = {
         nav: [btFiles, btCompose],
         name: 'Export source file'
     },
+    inOdt : {
+        content: odt,
+        nav: [btFiles, btCompose],
+        name: 'Export FODT file (for LibreOffice and other)'
+    },
     allContentAndNav: [
-        files, compose, htmlPreview, htmlSource, source,
-        btFiles, btCompose, btHtml, btToggleSourcePreview, btSource
+        files, compose, htmlPreview, htmlSource, source, odt,
+        btFiles, btCompose, btHtml, btToggleSourcePreview, btSource, btOdt
     ],
 
     //constants
@@ -126,6 +136,7 @@ function setDoc(doc) {
     uuids.unshift(doc.uuid);
     localStorage.setItem('docs', JSON.stringify(uuids));
     localStorage.setItem(doc.uuid + '.blocks', JSON.stringify(doc.blocks));
+    console.log('push in LS : blocks', JSON.stringify(doc.blocks));
     localStorage.setItem(doc.uuid + '.name', doc.name);
     if (doc.title) {
         localStorage.setItem(doc.uuid + '.title', doc.title);
@@ -283,7 +294,7 @@ function generateSource() {
         title = localStorage.getItem(uuid + '.title'),
         author = localStorage.getItem(uuid + '.author'),
         blocks = JSON.parse(localStorage.getItem(uuid + '.blocks'));
-    console.log(uuid, localStorage.getItem(uuid + '.blocks'));
+    
     blocks = blocks.map(function (blk) {
         return {id: blk.id, content: blk.content};
     });
@@ -485,24 +496,55 @@ function setCaret(block, caret) {
     sel.addRange(range);
 } // unused
 
-function caretMoved() {
+function caretMoved(noNodes) {
     'use strict';
-    /*var nodes, node, id, oldNode;
 
-    nodes = caretNodes();
-    console.log(nodes);
+    var nodes, node, oldNode, nbBlocks, domBlocks = [], blocks = [], startNode;
 
+    if (noNodes) {
+        nodes = [];
+    } else {
+        nodes = caretNodes();
+    }
+    
     for (oldNode of app.currentBlock) {
-        id = oldNode.id;
-        if (oldNode.textContent.trim() !== '') {
-            //donne des conversions a l'ancien noeud courant UNIQUEMENT s'il ne fait pas partie des noeuds courants
-            if (nodes.indexOf(oldNode) === -1) {
-                oldNode.innerHTML = convert.toJSON(oldNode.innerHTML);
-            }
+        if (oldNode.textContent.trim() === '' && nodes.indexOf(oldNode) === -1) {
+            //supprime le noeud vide qui ne fait pas partie des nouveaux noeuds courant
+            oldNode.remove();
         }
-    }*/
+    }
+    
+    //set blocks in LS
+    domBlocks = app.compose.childNodes;
+    for (var i = 0, nb = domBlocks.length; i < nb; i++) {
+        blocks.push({content: domBlocks[i].innerHTML, id: domBlocks[i].id});
+    }
+    
+    console.log(blocks);
+    localStorage.setItem(app.currentDoc + '.blocks', JSON.stringify(blocks));
+    console.log('push in LS : blocks', JSON.stringify(blocks));
+    
+    nbBlocks = JSON.parse(localStorage.getItem(app.currentDoc + '.blocks')).length;
+    
+    if (nbBlocks === 0) {
+        startNode = document.createElement('p');
+        startNode.textContent = "Start here.";
+        startNode.title = "#1";
+        startNode.id = 1;
+        app.compose.appendChild(startNode);
+        localStorage.setItem(app.currentDoc + '.blocks', JSON.stringify([{
+            content: "Start here.",
+            id: 1
+        }]));
+        console.log('push in LS : blocks', JSON.stringify([{
+            content: "Start here.",
+            id: 1
+        }]));
+        localStorage.setItem(app.currentDoc + '.idMax', 1);
+    }
 
-    app.currentBlock = caretNodes();
+    app.currentBlock = nodes;
+    console.log(app.currentBlock);
 }
 
 function saveTextAsFile() {
@@ -605,7 +647,7 @@ var discoverDoc = {
         },
         {
             id: 6,
-            content: "Sous ce menu se trouve la section dans laquelle nous sommes, aintion \"Composer\", il est possible de modifier ce texte en cliquant dessus. Un curseur apparaît. Essaye :)szez"
+            content: "Sous ce menu se trouve la section dans laquelle nous sommes, aintion \"Composer\", il est possible de modifier ce texte en cliquant dessus. Un curseur apparaît. Essaye :)"
         },
         {
             id: 7,
@@ -969,7 +1011,6 @@ var convert = {
             });
 
             node.innerHTML = items2.join('');
-            
             return node;
         }
 
@@ -1342,7 +1383,9 @@ app.btHtml.addEventListener('click', function () {
     //for (block of blocks) { //ES6
     for (var i = 0, nb = blocks.length; i < nb; i++) {
         block = blocks[i];
-        app.inHtmlPreview.content.appendChild(convert.toHTML(block));
+        if (block.textContent && block.textContent.trim() !== "") {
+            app.inHtmlPreview.content.appendChild(convert.toHTML(block));
+        }
     }
     
     //on affiche le content requis
@@ -1388,7 +1431,7 @@ app.btToggleSourcePreview.addEventListener('click', function () {
 }, false);
 app.btCompose.addEventListener('click', function () {
     'use strict';
-    var el, block, node, firstDocBlocks, i, nb;
+    var el, block, blocks = [], node, firstDocBlocks, i, nb;
     
     //on masque nav et content
     for (el of app.allContentAndNav) {
@@ -1405,12 +1448,24 @@ app.btCompose.addEventListener('click', function () {
         firstDocBlocks = JSON.parse(localStorage.getItem(app.currentDoc + '.blocks'));
         //for (block of firstDocBlocks) { //ES6
         nb = firstDocBlocks.length;
+        if (nb === 0 || (nb === 1 && firstDocBlocks[0].content === "<br>")) { //aucun noeud
+            firstDocBlocks = [];
+            firstDocBlocks.push({content: "Let's go !", id: 1}); //à faire ici : mettre bon id + enregistrer dans LS
+            localStorage.setItem(app.currentDoc + '.idMax', 1);
+            nb = 1;
+        }
+                
         for (i = 0; i < nb; i++) {
             block = firstDocBlocks[i];
+            
             node = document.createElement('p');
             node.id = block.id;
             node.innerHTML = block.content;
-            app.inCompose.content.appendChild(node);
+            if (node.textContent.trim() !== '') {
+                app.inCompose.content.appendChild(node);
+                blocks.push({content: block.content, id: block.id});
+            }
+            localStorage.setItem(app.currentDoc + '.blocks', JSON.stringify(blocks));
         }
     } else {
         setDoc(discoverDoc);
@@ -1482,6 +1537,7 @@ app.btFiles.addEventListener('click', function () {
                 localStorage.removeItem(uuid + '.title');
                 localStorage.removeItem(uuid + '.blocks');
                 localStorage.removeItem(uuid + '.author');
+                localStorage.removeItem(uuid + '.idMax');
                 app.currentDoc = docs[0];
                 app.btFiles.click();
             };
@@ -1495,15 +1551,38 @@ app.btFiles.addEventListener('click', function () {
 
     app.inFiles.content.style.display = 'block';
 }, false);
+app.btOdt.addEventListener('click', function () {
+    'use strict';
+    var el;
+    
+    //on masque nav et content
+    for (el of app.allContentAndNav) {
+        el.style.display = 'none';
+    }
+    //on affiche les elements de nav nécessaires
+    for (el of app.inOdt.nav) {
+        el.style.display = 'inline';
+    }
+    
+    app.pageName.innerHTML = app.inOdt.name + ' (' + localStorage.getItem(app.currentDoc + '.name')  + ')';
+    
+    app.inOdt.content.style.display = 'block';
+}, false);
 
 /* app.compose events */
 app.compose.addEventListener('keydown', function (e) {
     var
         code = e.keyCode || e.which;
+    
     if (code === app.TAB_KEY) {
         e.preventDefault();
         /* par la suite, insérer 4 espaces à chaque appui en partant du bord et pas de la position
         du curseur, bien que celle-ci joue un rôle (tab est pratique pour les tableaux) */
+    }
+    if (code === app.RETURN_KEY) {
+        if (this.textContent === '') { //empêche la suppression de l'unique bloc vide
+            e.preventDefault();
+        }
     }
 }, false);
 app.compose.addEventListener('keypress', function (e) {
@@ -1555,6 +1634,7 @@ app.compose.addEventListener('keypress', function (e) {
                 }
             }
             localStorage.setItem(uuid + '.blocks', JSON.stringify(blocks));
+            console.log('push in LS : blocks', JSON.stringify(blocks));
             return;
         }
         
@@ -1614,8 +1694,11 @@ app.compose.addEventListener('input', function () {
         blocks.push(node);
     }
     localStorage.setItem(uuid + '.blocks', JSON.stringify(blocks));
+    console.log('push in LS : blocks', JSON.stringify(blocks));
 }, false);
-app.compose.addEventListener('click', caretMoved, false);
+app.compose.addEventListener('click', function (e) {
+    caretMoved();
+}, false);
 app.compose.addEventListener('keyup', function (e) {
     'use strict';
     //il se peut que opera préfère keypress à keyup : http://stackoverflow.com/a/14934765/4034421
@@ -1626,6 +1709,475 @@ app.compose.addEventListener('keyup', function (e) {
     if (keys.indexOf(code) !== -1) {
         caretMoved();
     }
+}, false);
+app.compose.addEventListener('blur', function (e) {
+    caretMoved(true);
+}, false);
+app.compose.addEventListener('paste', function (e) {
+    'use strict';
+    
+    function parseHTML(str) {
+        var tmp = document.implementation.createHTMLDocument('Temp doc'); //create html doc with 'Temp doc' for title
+        tmp.body.innerHTML = str;
+        return tmp.body.children;
+    }
+    
+    function getElementDefaultDisplay(tag) {
+        var
+            cStyle,
+            t = document.createElement(tag),
+            gcs = "getComputedStyle" in window;
+
+        document.body.appendChild(t);
+        cStyle = (gcs ? window.getComputedStyle(t, "") : t.currentStyle).display; 
+        document.body.removeChild(t);
+
+        return cStyle;
+    }
+    
+    var
+        htmlStr, txtStr,
+        lines, line, nb, i, ensemble = [], final = '',
+        currentBlock, currentId, debText, endText,
+        prevBlock, idMax, elements, div, cursorPlace, caret,
+        
+        nodes, node, nodesClear = [], nodeClear, marker, tag, content, j, linesGrouped = [];
+    
+    e.preventDefault();
+    
+    htmlStr = e.clipboardData.getData('text/html');
+    
+    if (htmlStr === '') {
+        txtStr = e.clipboardData.getData('text/plain');
+        if (txtStr.trim() !== '') { // plain text
+            //console.log('texte pur : ', txtStr);
+            lines = txtStr.split('\n');
+            nb = lines.length;
+            currentBlock = app.currentBlock[0];
+            currentId = currentBlock.id;
+            
+            caret = caretInfos(currentBlock);
+            debText = currentBlock.innerHTML.substring(0, caret.start);
+            endText = currentBlock.innerHTML.substring(caret.end);
+            lines[0] = debText + lines[0];
+            lines[nb - 1] = lines[nb - 1] + endText;
+            
+            //create blocks
+            for (i = 0; i < nb; i++) {
+                line = lines[i].trim();
+                if (line !== '') {
+                    ensemble.push(line);
+                } else if (ensemble.length > 0) {
+                    final += '<p>' + ensemble.join('<br>') + '</p>';
+                    ensemble = [];
+                }
+            }
+            if (ensemble.length > 0) {
+                final += '<p>' + ensemble.join('<br>') + '</p>';
+            }
+            
+            div = document.createElement('div');
+            div.innerHTML = final;
+            console.log(final);
+            elements = div.childNodes;
+            
+            //what is the prev block ?
+            if (currentBlock.previousSibling) {
+                prevBlock = currentBlock.previousSibling;
+            } else {
+                prevBlock = null;
+            }
+            console.log(prevBlock);
+            
+            // remove current block
+            currentBlock.remove();
+            
+            // add all p in dom with ids (first p's id = id of block removed)
+            nb = elements.length;
+            idMax = localStorage.getItem(app.currentDoc + '.idMax');
+            
+            for (i = 0; i < nb; i++) {
+                element = elements[i];
+                
+                if (i === 0) {
+                    element.id = currentId;
+                } else {
+                    idMax ++;
+                    
+                    element.id = idMax;
+                }
+                console.log(element);
+            }
+            for (i = 0; i < nb; i++) {
+                element = elements[0];
+                if (prevBlock) {
+                    app.compose.insertBefore(element, prevBlock.nextSibling);
+                } else {
+                    app.compose.insertBefore(element, app.compose.childNodes[0]);
+                }
+                prevBlock = element;
+            }
+            
+            //give caret for last p add
+            cursorPlace = element.innerHTML.length - endText.length;
+            setCaret(element, {start: cursorPlace, end: cursorPlace});
+            caretMoved();
+            
+            return;
+        } else return;
+    }
+    
+    //html text
+    
+    nodes = parseHTML(htmlStr);
+    if (nodes.length === 0) {
+        return;
+    }
+    
+    console.log(nodes);
+    
+    //on enlève les types de noeuds qu'on ne veut pas garder
+    nb = nodes.length;
+    for (i = 0; i < nb; i++) {
+        node = nodes[i];
+        if (node.textContent.replace(/(\r\n|\n|\r)/gm, ' ').trim() !== '' && node.nodeName !== 'STYLE' && node.nodeName !== 'META' && node.nodeName !== 'TITLE') {
+            nodeClear = document.createElement(node.nodeName);
+            nodeClear.innerHTML = node.innerHTML.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+            nodesClear.push(nodeClear);
+        }
+    }
+    
+    console.log(nodesClear); // cas possibles : A : [span, strong, truc_inline] ou B : [h1, p, p, truc_block], mais jamais de mélange block/inline
+    
+    nb = nodesClear.length;
+    if (nb === 0) {
+        return;
+    }
+    
+    if (getElementDefaultDisplay(nodesClear[0].nodeName) === 'inline') { // cas A
+        console.log('inline');
+        // on joint les éléments du tableau
+        line = '';
+        for (i = 0; i < nb; i++) {
+            node = nodesClear[i];
+            line += node.outerHTML;
+        }
+        // on transforme les tags reconnus en marques
+        app.MARKERS.map(function (el) {
+            marker = new RegExp('\\<' + el.html + '\\>\\s*(.*?)\\s*' + '\\<\\/' + el.html + '\\>', 'g');
+            line = line.replace(marker, el.mark + el.mark + '$1' + el.mark + el.mark);
+        });
+        // on transforme aussi les liens, les images et les notes
+        
+        // on transforme les &truc; en leur équivalent textuel : à faire si ça ne se fait pas tout seul avec le textContent
+        console.log(line);
+        line = line.replace('&nbsp;', ' ').replace('&amp;', '&');
+        console.log(line);
+        
+        // on transforme les <br> et <br/> en un truc très très rare
+        
+        // on crée un noeud dont le innerHTML prend la nouvelle chaine
+        div = document.createElement('div');
+        div.innerHTML = line;
+        // on récupère de ce noeud le textContent
+        line = div.textContent;
+        console.log(line);
+        // on remet les br dans le résultat du textContent
+        
+        // on ajoute le résultat dans le bloc à la position du curseur
+        currentBlock = app.currentBlock[0];
+        caret = caretInfos(currentBlock);
+        debText = currentBlock.innerHTML.substring(0, caret.start);
+        endText = currentBlock.innerHTML.substring(caret.end);
+        currentBlock.innerHTML = debText + line + endText;
+        // on place le curseur où il faut
+        cursorPlace = currentBlock.innerHTML.length - endText.length;
+        setCaret(currentBlock, {start: cursorPlace, end: cursorPlace});
+        // on lance la fonction pour redéfinir le bloc courant
+        caretMoved();
+        return;
+    }
+    
+    // cas B
+    
+    console.log('block');
+    nodes = [];
+    for (i = 0; i < nb; i++) {
+        node = nodesClear[i];
+        line = node.innerHTML;
+        app.MARKERS.map(function (el) {
+            marker = new RegExp('\\<' + el.html + '\\>\\s*(.*?)\\s*' + '\\<\\/' + el.html + '\\>', 'g');
+            line = line.replace(marker, el.mark + el.mark + '$1' + el.mark + el.mark);
+        });
+        div = document.createElement('div');
+        div.innerHTML = line;
+        console.log(div.textContent);
+        nodes.push({tag: node.nodeName, content: div.textContent});
+    }
+    nb = nodes.length;
+    lines = [];
+    for (i = 0; i < nb; i++) {
+        node = nodes[i];
+        tag = node.tag;
+        content = node.content;
+        if (/^[—–-]\s/.test(content)) { // discuss
+            for (j = i; /^[—–-]\s/.test(nodes[j].content); j++) {
+                linesGrouped.push(nodes[j].content.replace(/^[—–-]\s/, '- '));
+                i++;
+            }
+            lines.push(linesGrouped.join('<br>'));
+            linesGrouped = [];
+            i--;
+        } else { // parag.
+            lines.push(content);
+        }
+    }
+    
+    console.log(lines);
+    
+    nb = lines.length;
+    currentBlock = app.currentBlock[0];
+    idMax = localStorage.getItem(app.currentDoc + '.idMax');
+    for (i = 0; i < nb; i++) {
+        if (i === 0 && currentBlock.textContent.trim() === '') {
+            currentBlock.innerHTML = lines[i];
+        } else {
+            idMax ++;
+            node = document.createElement('p');
+            node.innerHTML = lines[i];
+            node.id = idMax;
+            app.compose.insertBefore(node, currentBlock.nextSibling);
+        }
+        
+        currentBlock = node;
+        //cursorPlace = node.innerHTML.length;
+        //setCaret(node, {start: cursorPlace, end: cursorPlace})
+        caretMoved();
+    }
+        
+        /*var
+            HTMLNodes = parseHTML(htmlStr),
+            node,
+            tag,
+            HTMLClearNodes = [],
+            virtualDiv = document.createElement('div'),
+            exceptAttrs = ['href', 'alt', 'src'],
+            walk_the_DOM = function walk (node, func) {
+                func(node);
+                node = node.firstChild;
+                while (node) {
+                    walk(node, func);
+                    node = node.nextSibling;
+                }
+            },
+            attributes,
+            nodes = [],
+            textContent,
+            innerHTML;
+        
+        for (var i = 0, nb = HTMLNodes.length; i < nb; i++) {
+            node = HTMLNodes[i];
+            textContent = node.textContent.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+            if (textContent !== '' || (node.nodeName !== 'STYLE' && node.nodeName !== 'META')) {
+                tag = node.localName;
+                innerHTML = node.innerHTML.replace(/(\r\n|\n|\r)/gm, ' ').trim();
+                HTMLClearNodes.push('<' + tag + '>' + innerHTML + '</' + tag + '>');
+            }
+        }
+        
+        virtualDiv.innerHTML = HTMLClearNodes.join('');
+        */
+        /*
+            On parcourt le DOM de virtualDiv afin de supprimer
+            tous les attributs (exceptés ceux de 'exceptAttrs').
+        */
+        /*walk_the_DOM(virtualDiv, function(el) {
+            if(el.nodeType === 1) {  //1 = element node
+                if (el.hasAttributes()) {
+                    attributes = el.attributes;
+                    var nb = attributes.length;
+                    while (nb--) {
+                        var attr = attributes[nb];
+                        // Si attr.name n'est pas trouvé dans le tableau 'exceptAttrs'.
+                        if (exceptAttrs.indexOf(attr.name) === -1) {
+                            el.removeAttribute(attr.name);
+                        }
+                    }
+                }
+            }
+        });
+
+        // On débale tous les éléments, sauf certains dont on veut conserver le tag.
+        var
+            selector = 
+                '*:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)' +
+                ':not(p):not(blockquote):not(ul):not(ol):not(li):not(hr):not(br):not(a)' +
+                ':not(i):not(em):not(b):not(strong):not(u):not(mark):not(sup):not(sub):not(code)',
+            elements = virtualDiv.querySelectorAll(selector),
+            el, parent;
+        
+        for (var i = 0, nb = elements.length; i < nb; i++) { 
+            el = elements[i];
+            parent = el.parentNode;
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
+        }
+        
+        console.log(virtualDiv.innerHTML);
+        */
+        /*
+            Conversion des balises HTML inlines en PBML.
+            Il serait bien d'avoir une constante 'correspondanceTable' pour
+            clarifier les choses. Il y a déjà ceci dans converter.js sous le
+            nom de 'var equiv'.
+        */
+        /*var
+            txt = virtualDiv.innerHTML,
+            simplesInlineTags = [
+                'i', 'em', 'b', 'strong', 'u', 'mark', 'sup', 'sub', 'code'
+            ],
+            simplesInlineMarks = [
+                '\'', '\'', '*', '*', '|', '_', '^', ',', '`'
+            ],
+            tag,
+            char,
+            regex;
+        
+        for (var i = 0, nb = simplesInlineMarks.length; i < nb; i++) {
+            tag = simplesInlineTags[i];
+            char = simplesInlineMarks[i];
+            regex = new RegExp('<' + tag + '>(.*?)<\/' + tag + '>', 'ig');
+            txt = txt.replace(regex, char + char + '$1' + char + char);        
+        }
+        
+        */
+        //améliorer cette partie sérieusement :
+        /*
+            - il n'y a pas que le &nbsp; à remplacer
+            - en plus des liens, il y a les notes et les images
+        */
+        /*txt = txt
+            .replace(/<a href="(.*?)">(.*?)<\/a>/ig, '[[$2|$1]]')
+            .replace(/&nbsp;/g, ' ')
+            .trim();
+        
+        console.log(txt);
+        
+        var
+            nodes = parseHTML(txt),
+            node,
+            tag,
+            tab_disc = [],
+            regex = /^[—–-]\s/g,
+            HTMLEl = [];
+        
+        if (nodes.length === 0) { //on n'a pas un noeud de type bloc mais un simple contenu inline
+            currentBlock = app.currentBlock[0];
+            caret = caretInfos(currentBlock);
+            debText = currentBlock.innerHTML.substring(0, caret.start);
+            endText = currentBlock.innerHTML.substring(caret.end);
+            
+            currentBlock.innerHTML = debText + txt + endText;
+            
+            cursorPlace = currentBlock.innerHTML.length - endText.length;
+            setCaret(currentBlock, {start: cursorPlace, end: cursorPlace}); //merde quand le curseur est après un br dans le bloc
+            caretMoved();
+            
+            return;
+        }
+        
+        console.log(nodes); // J'EN SUIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+        for (var i = 0, nb = nodes.length; i < nb; i++) {
+            node = nodes[i];
+            tag = node.localName;
+            innerHTML = node.innerHTML.trim();
+            if (/^[—–-]\s/g.test(innerHTML)) {
+                tab_disc.push(innerHTML.replace(/^[—–-]\s/g, ''));
+                for (i = i; (i < nb - 1) && (/^[—–-]\s/g.test(nodes[i].nextSibling.innerHTML)); i++) {
+                    tab_disc.push(nodes[i+1].innerHTML.trim().replace(/^[—–-]\s/g, ''));
+                }
+                console.log(tab_disc);
+                tab_disc = tab_disc.map(function (el, i) {
+                    return ['<p>', el, '</p>'].join('');
+                });
+                HTMLEl.push('<div>' + tab_disc.join('') + '</div>');
+                console.log('<div>' + tab_disc.join('') + '</div>');
+                tab_disc = [];
+            } else {
+                HTMLEl.push('<'+tag+'>' + innerHTML + '</'+tag+'>');
+            }
+            
+        }
+
+        htmlObj = parseHTML(HTMLEl.join(''));
+
+        var node, nodeName, textContent, innerHTML, contents = [];
+        for (var i = 0, nb = htmlObj.length; i < nb; i++) {
+            node = htmlObj[i];
+            nodeName = node.nodeName;
+            textContent = node.textContent;
+            innerHTML = node.innerHTML;
+            
+            switch (true) {                    
+                case nodeName === 'P':
+                    if (textContent !== '' 
+                        && !/^\s*$/.test(textContent) 
+                        && !/^\/\/\/$/.test(textContent)
+                    ) {
+                        contents.push(textContent);
+                    }
+                    break;
+                    
+                case nodeName === 'DIV':
+                    var elts = parseHTML(innerHTML), tabReplics = [];
+                    for (var j = 0, nbElts = elts.length; j < nbElts; j++) {
+                        tabReplics.push('- ' + elts[j].textContent);
+                    }
+                    contents.push(tabReplics.join('\n'));
+				    break;
+                    
+                case /^H[1-6]$/i.test(nodeName):
+				    var
+                        lvl = parseInt(nodeName.substring(1)),
+                        type = new Array(lvl + 1).join('=');
+                    contents.push(type + ' ' + textContent);
+				    break;
+                    
+                case nodeName === 'HR':
+                    contents.push('---');
+				    break;
+                    
+                case /^[UO]L$/i.test(nodeName):
+                    //todo (evolution) : multi levels + ul/ol distinction
+                    var
+                        tabLi = node.childNodes,
+                        items = [],
+                        nb = tabLi.length,
+                        el = '';
+                    
+                    for (var j = 0; j < nb; j++) {
+                        items.push('* ' + tabLi[j].textContent);
+                    }
+                    contents.push(items.join('\n'));
+                    break;
+                
+                default: //tout devient p
+                    if (textContent !== '' 
+                        && !/^\s*$/.test(textContent) 
+                        && !/^\/\/\/$/.test(textContent)
+                    ) {
+                        contents.push(textContent);
+                    }
+                    break;
+            }
+        }
+    }
+    return contents || [];
+    */
+    
+    
+    
+
 }, false);
 
 /* Files : events */
@@ -1659,3 +2211,8 @@ app.btExportTale.addEventListener('click', saveTextAsFile, false);
 
 //localStorage.clear();
 app.btCompose.click();
+
+/*
+    on ne veut jamais de bloc vide dans le ls :
+    -> un bloc vide disparait du dom et du ls (s'il y est) s'il perd le focus
+*/

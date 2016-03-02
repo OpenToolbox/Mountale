@@ -32,14 +32,15 @@
         <header>
             <h1>MOUNTALE<span> v0.5</span></h1>
             <div id=topNav>
-                <a title="Open source code on Github" href='https://github.com/svenseitan/svenseitan.github.io'><span class="icon-github"></span</a>
+                <a title="Open source code on Github" href='https://github.com/svenseitan/svenseitan.github.io'><span class="icon-github"></span></a>
                 <a title="Full documentation" href='https://github.com/svenseitan/svenseitan.github.io/blob/master/README.md'><span class="icon-help"></span></a>
             </div>
-            
         </header>
+        
         <nav id=nav>
             <span class=bt id=btFiles>FILES</span>
             <span class=bt id=btSource>SOURCE</span>
+            <span class=bt id=btOdt>ODT</span>
             <span class=bt id=btHtml>HTML</span>
             <span class=bt id=btCompose style="display:none;">COMPOSER</span>
             <span class=bt id=btToggleSourcePreview style="display:none;"></span>
@@ -78,6 +79,9 @@
         <div id=source style="display:none;">
             <p><button id=btExportTale>Save source file</button> or copy &amp; paste this code in an empty file named&nbsp;: "doc_name.tale".</p>
             <div id=sourceContent contenteditable></div>
+        </div>
+        <div id=odt style="display:none;">
+            <p><button id=btExportOdt>Save FODT file</button></p>
         </div>
         
         <script src=core/composer.js></script>
