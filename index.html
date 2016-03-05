@@ -82,9 +82,19 @@
         </div>
         <div id=odt style="display:none;">
             <p><button id=btExportOdt>Save FODT file</button></p>
+            <p>L'export en FODT permet d'obtenir un document portant l'extension <em>.fodt</em>. Ce type de fichier s'ouvre avec LibreOffice Writer et peut être converti en d'autres types de fichiers depuis LibreOffice (<em>.odt</em>, <em>.pdf</em>, ...).</p>
+            <p>Actuellement, l'export fonctionne correctement pour les documents ne comportant que&nbsp;:</p>
+            <ul>
+                <li>des blocs de type&nbsp;: titre 1 (=), titre 2 (==), paragraphe (sans poésie), dialogue (-) et saut de ligne (---);</li>
+                <li>les mises en forme de texte&nbsp;: gras (**) et italique ('');</li>
+                <li>des notes de bas de page.</li>
+            </ul>
+            <p>Cela peut suffire lorsqu'il s'agit de produire un roman. Dans LibreOffice et sa liste de styles personnalisés seront disponibles les styles générés par Mountale. Il est possible de les modifier pour changer la mise en forme du document rapidement.</p>
+            <p>Un document Mountale qui ne respecte pas les critères de la liste ci-dessus peut générer, au pire, un fichier <em>.fodt</em> erroné et non utilisable. Et au mieux, un fichier <em>.fodt</em> dont certains mots ou parties de phrases manqueront.</p>
         </div>
         
         <script src=core/composer.js></script>
+        <script src=core/fodt.js></script><!-- for LibreOffice export -->
 
     </body>
 

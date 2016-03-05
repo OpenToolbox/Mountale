@@ -67,7 +67,9 @@ var app = {
     //markers
     MARKERS: [
         {mark: '\'', html: 'em', entity: '&apos;'},
+        {mark: '\'', html: 'i', entity: '&apos;'},
         {mark: '*', html: 'strong', entity: '&ast;'},
+        {mark: '*', html: 'b', entity: '&ast;'},
         {mark: '|', html: 'mark', entity: '&verbar;'},
         {mark: '_', html: 'u', entity: '&lowbar;'},
         {mark: '^', html: 'sup', entity: '&Hat;'},
@@ -519,10 +521,9 @@ function caretMoved(noNodes) {
     for (var i = 0, nb = domBlocks.length; i < nb; i++) {
         blocks.push({content: domBlocks[i].innerHTML, id: domBlocks[i].id});
     }
-    
-    console.log(blocks);
+
     localStorage.setItem(app.currentDoc + '.blocks', JSON.stringify(blocks));
-    console.log('push in LS : blocks', JSON.stringify(blocks));
+    console.log('push in LS : blocks');
     
     nbBlocks = JSON.parse(localStorage.getItem(app.currentDoc + '.blocks')).length;
     
@@ -536,10 +537,7 @@ function caretMoved(noNodes) {
             content: "Start here.",
             id: 1
         }]));
-        console.log('push in LS : blocks', JSON.stringify([{
-            content: "Start here.",
-            id: 1
-        }]));
+        console.log('push in LS : blocks');
         localStorage.setItem(app.currentDoc + '.idMax', 1);
     }
 
@@ -555,6 +553,47 @@ function saveTextAsFile() {
     var textFileAsBlob = new Blob([textToWrite], {type:'application/json'});
     // Specify the name of the file to be saved
     var fileNameToSaveAs = localStorage.getItem(app.currentDoc + '.name') + '.tale';
+
+    // Optionally allow the user to choose a file name by providing 
+    // an imput field in the HTML and using the collected data here
+    // var fileNameToSaveAs = txtFileName.text;
+
+    // create a link for our script to 'click'
+    var downloadLink = document.createElement("a");
+    //  supply the name of the file (from the var above).
+    // you could create the name here but using a var
+    // allows more flexability later.
+    downloadLink.download = fileNameToSaveAs;
+    // provide text for the link. This will be hidden so you
+    // can actually use anything you want.
+    downloadLink.innerHTML = "My Hidden Link";
+
+    // allow our code to work in webkit & Gecko based browsers
+    // without the need for a if / else block.
+    window.URL = window.URL || window.webkitURL;
+
+    // Create the link Object.
+    downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+    // when link is clicked call a function to remove it from
+    // the DOM in case user wants to save a second file.
+    downloadLink.onclick = destroyClickedElement;
+    // make sure the link is hidden.
+    downloadLink.style.display = "none";
+    // add the link to the DOM
+    document.body.appendChild(downloadLink);
+
+    // click the new link
+    downloadLink.click();
+}
+
+function saveTextAsOdt() {
+    'use strict';
+    // grab the content of the form field and place it into a variable
+    var textToWrite = getfOdt();
+    //  create a new Blob (html5 magic) that contains the data from your form feild
+    var textFileAsBlob = new Blob([textToWrite], {type:'text/xml'});
+    // Specify the name of the file to be saved
+    var fileNameToSaveAs = localStorage.getItem(app.currentDoc + '.name') + '.fodt';
 
     // Optionally allow the user to choose a file name by providing 
     // an imput field in the HTML and using the collected data here
@@ -1265,6 +1304,173 @@ var convert = {
             default: return to_paragraph(block);
         }
     },
+    toFODT: function (nodeLS) { //Object {content: "---", id: "9"}
+        var content, firstChar;
+        content = convert.toJSON(nodeLS.content);
+        firstChar = content.substring(0, 1);
+        
+        function to_fodt(pbml) {
+            //cette fonction convertit uniquement une seule ligne de contenu lors de son appel en HTML (inline). Le contenu est tout sauf le marquage de type bloc.
+
+            //utile uniquement pour le développement
+            if (typeof pbml !== 'string') {
+                console.error("Signature de la fonction to_fodt incorrecte : Chaine requise et pas ça :");
+                console.log(pbml);
+                return '<mark>error</mark>';
+            }
+
+            var ml, marker, regexLink, array, str, opts, opt, a, i, nb, regexImg, img, thisCase;
+
+            //echap note, link, image (in order)
+            ml = pbml.replace(/\\\(\((.*?)\)\)/g, '&lpar;&lpar;$1&rpar;&rpar;');
+            ml = ml.replace(/\\\[\[(.*?)\]\]/g, '&lsqb;&lsqb;$1&rsqb;&rsqb;');
+            ml = ml.replace(/\\\{\{(.*?)\}\}/g, '&lcub;&lcub;$1&rcub;&rcub;');
+
+            //echap double tags
+            app.MARKERS.map(function (el) {
+                marker = new RegExp('\\\\\\' + el.mark + '\\' + el.mark + '(.*?)\\\\\\' + el.mark + '\\' + el.mark, 'g');
+                ml = ml.replace(marker, el.entity + el.entity + '$1' + el.entity + el.entity);
+            });
+
+            // note
+            ml = ml.replace(/\(\((.*?)\)\)/ig, '<text:note><text:note-body><text:p>$1</text:p></text:note-body></text:note>');
+  
+
+            // link (à faire car celui ci est celui du html)
+            if (/\[\[(.*?)\]\]/g.test(ml)) {
+                regexLink = new RegExp('\\[\\[(.*?)\\]\\]', 'g');
+                while ((array = regexLink.exec(ml)) !== null) {
+                    str = array[0];
+                    opts = str.substring(2, str.length - 2).split('|');
+                    a = document.createElement("a");
+
+                    for (i = 0, nb = opts.length; i < nb; i++) {
+                        opt = opts[i].trim();
+                        if (i === nb - 1) { //last opt is link, always.
+                            a.href = opt;
+                            if (a.textContent === '') {
+                                a.textContent = opt;
+                            }
+                        } else if (opt === 'b') {
+                            a.target = '_blank';
+                        } else if (opt === 'nf') {
+                            a.rel = 'nofollow';
+                        } else {
+                            a.textContent = opt;
+                        }
+                    }
+                    ml = ml.replace(/\[\[(.*?)\]\]/, a.outerHTML);
+                }
+            }
+
+            // br (only in paragraphs)
+            ml = ml.replace(/\/\/\//ig, '<br/>');
+
+            // image (à faire car celui ci est celui du html)
+            if (/{{(.*?)}}/g.test(ml)) {
+                regexImg = new RegExp('{{(.*?)}}', 'g');
+                while ((array = regexImg.exec(ml)) !== null) {
+                    str = array[0];
+                    opts = str.substring(2, str.length - 2).split('|');
+                    img = document.createElement("img");
+                    thisCase = 0;
+
+                    for (i = 0, nb = opts.length; i < nb; i++) {
+                        opt = opts[i].trim();
+                        if (i === nb - 1) { //last opt is link, always.
+                            img.src = opt;
+                        } else if (['l', 'r', '25', '33', '50', '75', '100'].indexOf(opt) !== -1) {
+                            if (['l', 'r'].indexOf(opt) !== -1) {
+                                img.classList.add(opt === 'l' ? 'imgLeft' : 'imgRight');
+                            }
+                            if (['25', '33', '50', '75', '100'].indexOf(opt) !== -1) {
+                                img.style.width = opt + '%';
+                            }
+                        } else if (opt !== '') {
+                            if (thisCase === 0) {
+                                /*thisCase permet de savoir si c'est la première ou la seconde
+                                fois qu'une chaine se présente. 1ère fois = alt, 2nde = legend*/
+                                img.alt = opt;
+                                thisCase++;
+                            } else {
+                                //title
+                                img.title = opt;
+                                thisCase = 0;
+                            }
+
+                        }
+                    }
+                    ml = ml.replace(/{{(.*?)}}/, img.outerHTML);
+                }
+            }
+
+            // double tags
+            app.MARKERS.map(function (el) {
+                marker = new RegExp('\\' + el.mark + '\\' + el.mark + '\\s*(.*?)\\s*' + '\\' + el.mark + '\\' + el.mark, 'g');
+                ml = ml.replace(marker, '<' + el.html + '>$1</' + el.html + '>');
+            });
+
+            ml = ml.replace(/\s([;!?]){1}/g, ' $1');
+            ml = ml.replace(/\s([:»%]){1}/g, ' $1');
+            ml = ml.replace(/\s(«){1}\s*/g, ' $1 ');
+
+            //voir pour les demi cadratin
+            ml = ml.trim();
+
+
+            ml = ml.replace(/\\~~(.*?)\\~~/g, '&#126;&#126;$1&#126;&#126;');
+            ml = ml.replace(/~~(.*?)~~/g, '$1');
+            ml = ml.replace(/&#126;&#126;(.*?)&#126;&#126;/g, '~~$1~~');
+
+            //modification du em et du strong (patch a to_JSON pour to_FODT)
+            ml = ml.replace(
+                /<em>(.*?)<\/em>/g,
+                '<text:span text:style-name="Mountale.italic">$1</text:span>'
+            );
+            ml = ml.replace(
+                /<strong>(.*?)<\/strong>/g,
+                '<text:span text:style-name="Mountale.bold">$1</text:span>'
+            );
+
+            if (/<br\/>/.test(ml)) {
+                return {poem: true, data: ml};
+            } else {
+                return ml;
+            }
+        }
+                    
+        function to_paragraph(content) {
+            return '<text:p text:style-name="Mountale.paragraph">' + to_fodt(content) + '</text:p>';
+        }
+        function to_line() {
+            return '<text:p text:style-name="Mountale.line">***</text:p>';
+        }
+        function to_title(content) {
+            var level = 0, i;
+            for (i = 0; content[i] === '='; i++) {
+                level ++;
+            }
+            return '<text:p text:style-name="Mountale.title.' + level + '">' + to_fodt(content.substring(level + 1)) + '</text:p>';
+        }
+        function to_discuss(content) {
+            var lines, line, i, nb, result = [];
+            lines = content.split('<br>');
+            nb = lines.length;
+            for (i = 0; i < nb; i++) {
+                line = lines[i];
+                result.push('<text:p text:style-name="Mountale.discuss">— ' + to_fodt(line.substring(2)) + '</text:p>');
+            }
+            return result.join('\n      ');
+        }
+        
+        switch (true) {
+            case /[A-Za-z]/.test(firstChar): return to_paragraph(content);
+            case content === '---': return to_line();
+            case firstChar === '-': return to_discuss(content);
+            case firstChar === '=': return to_title(content);
+            default: return to_paragraph(content);
+        }
+    },
     toJSON: function (DOMBlock) {
         //block.content et domBlockEdit
         'use strict'; 
@@ -1738,10 +1944,11 @@ app.compose.addEventListener('paste', function (e) {
     var
         htmlStr, txtStr,
         lines, line, nb, i, ensemble = [], final = '',
-        currentBlock, currentId, debText, endText,
-        prevBlock, idMax, elements, div, cursorPlace, caret,
+        currentBlock, lastCurrentBlock, currentId, debText, endText,
+        prevBlock, idMax, elements, element, div, cursorPlace, caret, caret2,
         
-        nodes, node, nodesClear = [], nodeClear, marker, tag, content, j, linesGrouped = [];
+        nodes, node, nodesClear = [], nodeClear, marker, tag, content, j, linesGrouped = [],
+        footnotes = [], idNote;
     
     e.preventDefault();
     
@@ -1754,11 +1961,13 @@ app.compose.addEventListener('paste', function (e) {
             lines = txtStr.split('\n');
             nb = lines.length;
             currentBlock = app.currentBlock[0];
+            lastCurrentBlock = app.currentBlock[app.currentBlock.length - 1];
             currentId = currentBlock.id;
             
             caret = caretInfos(currentBlock);
+            caret2 = caretInfos(lastCurrentBlock);
             debText = currentBlock.innerHTML.substring(0, caret.start);
-            endText = currentBlock.innerHTML.substring(caret.end);
+            endText = lastCurrentBlock.innerHTML.substring(caret2.end);
             lines[0] = debText + lines[0];
             lines[nb - 1] = lines[nb - 1] + endText;
             
@@ -1790,20 +1999,20 @@ app.compose.addEventListener('paste', function (e) {
             console.log(prevBlock);
             
             // remove current block
-            currentBlock.remove();
-            
+            nb = app.currentBlock.length;
+            for (i = 0; i < nb; i++) {
+                app.currentBlock[i].remove();
+            }
+             
             // add all p in dom with ids (first p's id = id of block removed)
             nb = elements.length;
             idMax = localStorage.getItem(app.currentDoc + '.idMax');
-            
             for (i = 0; i < nb; i++) {
                 element = elements[i];
-                
                 if (i === 0) {
                     element.id = currentId;
                 } else {
                     idMax ++;
-                    
                     element.id = idMax;
                 }
                 console.log(element);
@@ -1834,25 +2043,55 @@ app.compose.addEventListener('paste', function (e) {
         return;
     }
     
-    console.log(nodes);
-    
-    //on enlève les types de noeuds qu'on ne veut pas garder
+    //on enlève les types de noeuds qu'on ne veut pas garder et on gère les notes de bas de page de LibreOffice
     nb = nodes.length;
     for (i = 0; i < nb; i++) {
         node = nodes[i];
-        if (node.textContent.replace(/(\r\n|\n|\r)/gm, ' ').trim() !== '' && node.nodeName !== 'STYLE' && node.nodeName !== 'META' && node.nodeName !== 'TITLE') {
+        if (node.nodeName !== 'STYLE' && node.nodeName !== 'META' && node.nodeName !== 'TITLE') {
             nodeClear = document.createElement(node.nodeName);
-            nodeClear.innerHTML = node.innerHTML.replace(/(\r\n|\n|\r)/gm, ' ').trim();
-            nodesClear.push(nodeClear);
+            if (!/^sdfootnote/.test(node.id)) { //ODT File footnote
+                nodeClear.innerHTML = node.innerHTML.replace(/(\r\n|\n|\r)/gm, ' ').replace(/&nbsp;/g, ' ').replace(/<br>$/, '').trim();
+                if(nodeClear.textContent === '') {
+                    nodeClear.innerHTML = '---';
+                }
+                nodesClear.push(nodeClear);
+            } else {
+                idNote = node.id.replace(/^sdfootnote([0-9]+)$/, '$1');
+                node = node
+                    .lastElementChild
+                    .innerHTML
+                    .replace(/(\r\n|\n|\r)/gm, ' ')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/<br>$/, '')
+                    .trim()
+                    .replace(/\s+/g, ' ');
+                
+                app.MARKERS.map(function (el) {
+                    marker = new RegExp('\\<' + el.html + '\\>\\s*(.*?)\\s*' + '\\<\\/' + el.html + '\\>', 'g');
+                    node = node.replace(marker, el.mark + el.mark + '$1' + el.mark + el.mark);
+                });
+                div = document.createElement('div');
+                div.innerHTML = node;
+                node = div.textContent;
+                footnotes.push(node.substring(idNote.length));
+            }
         }
     }
-    
-    console.log(nodesClear); // cas possibles : A : [span, strong, truc_inline] ou B : [h1, p, p, truc_block], mais jamais de mélange block/inline
-    
     nb = nodesClear.length;
     if (nb === 0) {
         return;
     }
+    if (footnotes.length > 0 && nb === 1) {
+        //on transforme l'unique élément de nodesClear en span pour entrer dans le cas A
+        nodeClear = nodesClear[0];
+        node = document.createElement('span');
+        node.innerHTML = nodeClear.innerHTML;
+        nodesClear = [node];
+    }
+    
+    console.log(nodesClear); // cas possibles : A : [span, strong, truc_inline] ou B : [h1, p, p, truc_block], mais jamais de mélange block/inline
+    
+    
     
     if (getElementDefaultDisplay(nodesClear[0].nodeName) === 'inline') { // cas A
         console.log('inline');
@@ -1863,12 +2102,21 @@ app.compose.addEventListener('paste', function (e) {
             line += node.outerHTML;
         }
         // on transforme les tags reconnus en marques
+        
+        // footnote
+        console.log(line);
+        if (footnotes.length > 0) {
+            var monTableau = line.match(/<a(.*?)><sup>(.*?)<\/sup><\/a>/g);
+            for (i = 0, nb = footnotes.length; i < nb; i++) {
+                line = line.replace(monTableau[i], '((' + footnotes[i] + '))');
+            }
+        }
+        
         app.MARKERS.map(function (el) {
             marker = new RegExp('\\<' + el.html + '\\>\\s*(.*?)\\s*' + '\\<\\/' + el.html + '\\>', 'g');
             line = line.replace(marker, el.mark + el.mark + '$1' + el.mark + el.mark);
         });
-        // on transforme aussi les liens, les images et les notes
-        
+
         // on transforme les &truc; en leur équivalent textuel : à faire si ça ne se fait pas tout seul avec le textContent
         console.log(line);
         line = line.replace('&nbsp;', ' ').replace('&amp;', '&');
@@ -1886,10 +2134,17 @@ app.compose.addEventListener('paste', function (e) {
         
         // on ajoute le résultat dans le bloc à la position du curseur
         currentBlock = app.currentBlock[0];
+        lastCurrentBlock = app.currentBlock[app.currentBlock.length - 1];
         caret = caretInfos(currentBlock);
+        caret2 = caretInfos(lastCurrentBlock);
         debText = currentBlock.innerHTML.substring(0, caret.start);
-        endText = currentBlock.innerHTML.substring(caret.end);
+        endText = lastCurrentBlock.innerHTML.substring(caret2.end);
         currentBlock.innerHTML = debText + line + endText;
+        // on supprime les blocs courants sauf le premier
+        nb = app.currentBlock.length;
+        for (i = 1; i < nb; i++) {
+            app.currentBlock[i].remove();
+        }
         // on place le curseur où il faut
         cursorPlace = currentBlock.innerHTML.length - endText.length;
         setCaret(currentBlock, {start: cursorPlace, end: cursorPlace});
@@ -1900,32 +2155,47 @@ app.compose.addEventListener('paste', function (e) {
     
     // cas B
     
-    console.log('block');
+    console.log('cas B : blocks');
     nodes = [];
     for (i = 0; i < nb; i++) {
         node = nodesClear[i];
         line = node.innerHTML;
+        // footnote
+        var monTableau = line.match(/<a(.*?)><sup>(.*?)<\/sup><\/a>/g) ;
+        if (monTableau) { 
+            console.log(footnotes);
+            console.log(monTableau);
+            for (j = 0; j < monTableau.length; j++) {
+                line = line.replace(monTableau[j], '((' + footnotes[j] + '))');
+            }
+        }
+        
         app.MARKERS.map(function (el) {
             marker = new RegExp('\\<' + el.html + '\\>\\s*(.*?)\\s*' + '\\<\\/' + el.html + '\\>', 'g');
             line = line.replace(marker, el.mark + el.mark + '$1' + el.mark + el.mark);
         });
         div = document.createElement('div');
         div.innerHTML = line;
-        console.log(div.textContent);
         nodes.push({tag: node.nodeName, content: div.textContent});
     }
+    console.log(nodes);
     nb = nodes.length;
     lines = [];
     for (i = 0; i < nb; i++) {
         node = nodes[i];
         tag = node.tag;
         content = node.content;
+        console.log(i);
         if (/^[—–-]\s/.test(content)) { // discuss
-            for (j = i; /^[—–-]\s/.test(nodes[j].content); j++) {
-                linesGrouped.push(nodes[j].content.replace(/^[—–-]\s/, '- '));
-                i++;
+            console.log(nodes[i]);
+            for (i; nodes[i] && /^[—–-]\s/.test(nodes[i].content); i++) {
+                console.log('i: ', i);
+                linesGrouped.push(nodes[i].content.replace(/^[—–-]\s/, '- '));
+                //i++;
             }
+
             lines.push(linesGrouped.join('<br>'));
+            console.log(lines);
             linesGrouped = [];
             i--;
         } else { // parag.
@@ -2206,6 +2476,10 @@ app.htmlOptsPrefix.addEventListener('input', function () {
 /* Source file : events */
 
 app.btExportTale.addEventListener('click', saveTextAsFile, false);
+
+/* FODT file : events */
+
+app.btExportOdt.addEventListener('click', saveTextAsOdt, false);
 
 /* Init. app */
 
