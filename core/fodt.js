@@ -1,3 +1,22 @@
+/*
+    Copyright 2016 - Sven Seitan
+    
+    This file is part of Mountale.
+
+    Mountale is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Mountale is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Mountale.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 function getfOdt() {
     var meta, allStyles, i, nb, pre = 'Mountale.', s, styles, props1, props2, props3, prop1, prop2, prop3, j, nb1, body, text, nodes, node, xmlDoc;
 
