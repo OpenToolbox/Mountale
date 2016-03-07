@@ -92,7 +92,7 @@ function getfOdt() {
                 {key: 'style:auto-text-indent', val: 'false'}
             ],
             textProperties: [
-                {key: 'fo:font-size', val: '26pt'},
+                {key: 'fo:font-size', val: '28pt'},
                 {key: 'fo:font-weight', val: 'bold'}
             ]
         },
@@ -115,7 +115,99 @@ function getfOdt() {
                 {key: 'style:auto-text-indent', val: 'false'}
             ],
             textProperties: [
-                {key: 'fo:font-size', val: '22pt'},
+                {key: 'fo:font-size', val: '24pt'},
+                {key: 'fo:font-weight', val: 'bold'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'title.3'},
+                {key: 'style:family', val: 'paragraph'},
+                {key: 'style:parentStyleName', val: 'Standard'},
+                {key: 'style:nextStyleName', val: pre + 'paragraph'}
+            ],
+            paragraphProperties: [
+                {key: 'fo:margin-left', val: '3.5cm'},
+                {key: 'fo:margin-right', val: '3.5cm'},
+                {key: 'fo:margin-top', val: '3cm'},
+                {key: 'fo:margin-bottom', val: '2cm'},
+                {key: 'loext:contextual-spacing', val: 'false'},
+                {key: 'fo:text-align', val: 'center'},
+                {key: 'style:justify-single-word', val: 'false'},
+                {key: 'fo:text-indent', val: '0cm'},
+                {key: 'style:auto-text-indent', val: 'false'}
+            ],
+            textProperties: [
+                {key: 'fo:font-size', val: '20pt'},
+                {key: 'fo:font-weight', val: 'bold'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'title.4'},
+                {key: 'style:family', val: 'paragraph'},
+                {key: 'style:parentStyleName', val: 'Standard'},
+                {key: 'style:nextStyleName', val: pre + 'paragraph'}
+            ],
+            paragraphProperties: [
+                {key: 'fo:margin-left', val: '0cm'},
+                {key: 'fo:margin-right', val: '0cm'},
+                {key: 'fo:margin-top', val: '3cm'},
+                {key: 'fo:margin-bottom', val: '2cm'},
+                {key: 'loext:contextual-spacing', val: 'false'},
+                {key: 'fo:text-align', val: 'left'},
+                {key: 'style:justify-single-word', val: 'false'},
+                {key: 'fo:text-indent', val: '0cm'},
+                {key: 'style:auto-text-indent', val: 'false'}
+            ],
+            textProperties: [
+                {key: 'fo:font-size', val: '18pt'},
+                {key: 'fo:font-weight', val: 'bold'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'title.5'},
+                {key: 'style:family', val: 'paragraph'},
+                {key: 'style:parentStyleName', val: 'Standard'},
+                {key: 'style:nextStyleName', val: pre + 'paragraph'}
+            ],
+            paragraphProperties: [
+                {key: 'fo:margin-left', val: '0cm'},
+                {key: 'fo:margin-right', val: '0cm'},
+                {key: 'fo:margin-top', val: '3cm'},
+                {key: 'fo:margin-bottom', val: '2cm'},
+                {key: 'loext:contextual-spacing', val: 'false'},
+                {key: 'fo:text-align', val: 'left'},
+                {key: 'style:justify-single-word', val: 'false'},
+                {key: 'fo:text-indent', val: '0cm'},
+                {key: 'style:auto-text-indent', val: 'false'}
+            ],
+            textProperties: [
+                {key: 'fo:font-size', val: '16pt'},
+                {key: 'fo:font-weight', val: 'bold'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'title.6'},
+                {key: 'style:family', val: 'paragraph'},
+                {key: 'style:parentStyleName', val: 'Standard'},
+                {key: 'style:nextStyleName', val: pre + 'paragraph'}
+            ],
+            paragraphProperties: [
+                {key: 'fo:margin-left', val: '0cm'},
+                {key: 'fo:margin-right', val: '0cm'},
+                {key: 'fo:margin-top', val: '3cm'},
+                {key: 'fo:margin-bottom', val: '2cm'},
+                {key: 'loext:contextual-spacing', val: 'false'},
+                {key: 'fo:text-align', val: 'left'},
+                {key: 'style:justify-single-word', val: 'false'},
+                {key: 'fo:text-indent', val: '0cm'},
+                {key: 'style:auto-text-indent', val: 'false'}
+            ],
+            textProperties: [
+                {key: 'fo:font-size', val: '14pt'},
                 {key: 'fo:font-weight', val: 'bold'}
             ]
         },
