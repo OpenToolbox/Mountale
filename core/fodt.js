@@ -229,8 +229,46 @@ function getfOdt() {
             textProperties: [
                 {key: 'fo:font-style', val: 'italic'}
             ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'underline'},
+                {key: 'style:family', val: 'text'}
+            ],
+            textProperties: [
+                {key: 'style:text-underline-style', val: 'solid'},
+                {key: 'style:text-underline-width', val: 'auto'},
+                {key: 'style:text-underline-color', val: 'font-color'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'highlight'},
+                {key: 'style:family', val: 'text'}
+            ],
+            textProperties: [
+                {key: 'fo:background-color', val: '#ffff00'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'superscript'},
+                {key: 'style:family', val: 'text'}
+            ],
+            textProperties: [
+                {key: 'style:text-position', val: 'super 58%'}
+            ]
+        },
+        {
+            style: [
+                {key: 'style:name', val: pre + 'subscript'},
+                {key: 'style:family', val: 'text'}
+            ],
+            textProperties: [
+                {key: 'style:text-position', val: 'sub 58%'}
+            ]
         }
-    ]; // peut-être inutile le officeooo:rsid
+    ];
 
     styles = '<office:styles>\n';
     nb = allStyles.length;

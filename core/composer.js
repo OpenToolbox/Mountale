@@ -1334,7 +1334,14 @@ var convert = {
 
             // note
             ml = ml.replace(/\(\((.*?)\)\)/ig, '<text:note><text:note-body><text:p>$1</text:p></text:note-body></text:note>');
-  
+            //superscript
+            ml = ml.replace(/\^\^(.*?)\^\^/g, '<text:span text:style-name="Mountale.superscript">$1</text:span>');
+            //subscript
+            ml = ml.replace(/\,\,(.*?)\,\,/g, '<text:span text:style-name="Mountale.subscript">$1</text:span>');
+            //underline
+            ml = ml.replace(/\_\_(.*?)\_\_/g, '<text:span text:style-name="Mountale.underline">$1</text:span>');
+            //highlight
+            ml = ml.replace(/\|\|(.*?)\|\|/g, '<text:span text:style-name="Mountale.highlight">$1</text:span>');
 
             // link (à faire car celui ci est celui du html)
             if (/\[\[(.*?)\]\]/g.test(ml)) {
