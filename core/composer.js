@@ -40,6 +40,7 @@ var app = {
     htmlSourceContent: document.getElementById('htmlSourceContent'),
     htmlOptsPrefix: document.getElementById('htmlOptsPrefix'),
     htmlOptsFull: document.getElementById('htmlOptsFull'),
+    htmlOptsCredits: document.getElementById('htmlOptsCredits'),
     
     source: document.getElementById('source'),
     btExportTale: document.getElementById('btExportTale'),
@@ -212,6 +213,7 @@ function generateHTML() {
         nodes = app.htmlPreview.childNodes,
         node,
         block,
+        creditsBlock,
         prefix = app.htmlOptsPrefix.value,
         article = document.createElement('article'),
         articleText,
@@ -236,6 +238,14 @@ function generateHTML() {
         }
         if (prefix !== '') block.id = prefix + node.id;
         article.appendChild(block);
+    }
+    
+    //credits
+    if (app.htmlOptsCredits.checked) {
+        creditsBlock = document.createElement('p');
+        creditsBlock.className = 'credits';
+        creditsBlock.innerHTML = 'Rédigé avec <a href=http://mountale.xyz title="Application d’écriture opensource"><em>Mountale</em></a>.';
+        article.appendChild(creditsBlock);
     }
 
     // footnotes in blocks
@@ -2476,6 +2486,10 @@ app.htmlOptsFull.addEventListener('change', function () {
     generateFull(this);
 }, false);
 app.htmlOptsPrefix.addEventListener('input', function () {
+    'use strict';
+    generateHTML();
+}, false);
+app.htmlOptsCredits.addEventListener('change', function () {
     'use strict';
     generateHTML();
 }, false);
