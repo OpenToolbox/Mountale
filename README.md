@@ -1,6 +1,15 @@
 # Description
 
-Mountale est une application d'écriture disposant de son propre langage pour publier du contenu sur Internet en HTML. Par la suite, elle permettra de générer des livres numériques complets.
+Mountale est une **application d'écriture** avec laquelle il est possible d'obtenir :
+
+- des documents HTML bien mis en forme (pour publier des articles de blog par exemple);
+- des documents FODT (ouvrables avec LibreOffice Writer avec des styles personnalisés et pratiques).
+
+Fonctionnalités interessantes :
+
+- copier/coller de contenus web ou de textes dans LibreOffice et génération propre du document Mountale;
+- syntaxe intuitive (qui ressemble un peu au Markdown) pour définir des types de blocs et des types de textes;
+- aperçu HTML.
 
 # Utilisation
 
