@@ -148,7 +148,7 @@ img.imgRight {
 }
 #nav2 {
     position: fixed;
-    left: 10px;
+    right: 10px;
     bottom: 10px;
 }
 #nav2 a{
