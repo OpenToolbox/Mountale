@@ -59,6 +59,10 @@ var app = {
     btToggleSourcePreview: document.getElementById('btToggleSourcePreview'),
     btSource: document.getElementById('btSource'),
     btOdt: document.getElementById('btOdt'),
+    
+    //tools
+    btTop: document.getElementById('btTop'),
+    btBottom: document.getElementById('btBottom'),
 
     //keys
     ENTER_KEY: 13,
@@ -2241,229 +2245,6 @@ app.compose.addEventListener('paste', function (e) {
         //setCaret(node, {start: cursorPlace, end: cursorPlace})
         caretMoved();
     }
-        
-        /*var
-            HTMLNodes = parseHTML(htmlStr),
-            node,
-            tag,
-            HTMLClearNodes = [],
-            virtualDiv = document.createElement('div'),
-            exceptAttrs = ['href', 'alt', 'src'],
-            walk_the_DOM = function walk (node, func) {
-                func(node);
-                node = node.firstChild;
-                while (node) {
-                    walk(node, func);
-                    node = node.nextSibling;
-                }
-            },
-            attributes,
-            nodes = [],
-            textContent,
-            innerHTML;
-        
-        for (var i = 0, nb = HTMLNodes.length; i < nb; i++) {
-            node = HTMLNodes[i];
-            textContent = node.textContent.replace(/(\r\n|\n|\r)/gm, ' ').trim();
-            if (textContent !== '' || (node.nodeName !== 'STYLE' && node.nodeName !== 'META')) {
-                tag = node.localName;
-                innerHTML = node.innerHTML.replace(/(\r\n|\n|\r)/gm, ' ').trim();
-                HTMLClearNodes.push('<' + tag + '>' + innerHTML + '</' + tag + '>');
-            }
-        }
-        
-        virtualDiv.innerHTML = HTMLClearNodes.join('');
-        */
-        /*
-            On parcourt le DOM de virtualDiv afin de supprimer
-            tous les attributs (exceptés ceux de 'exceptAttrs').
-        */
-        /*walk_the_DOM(virtualDiv, function(el) {
-            if(el.nodeType === 1) {  //1 = element node
-                if (el.hasAttributes()) {
-                    attributes = el.attributes;
-                    var nb = attributes.length;
-                    while (nb--) {
-                        var attr = attributes[nb];
-                        // Si attr.name n'est pas trouvé dans le tableau 'exceptAttrs'.
-                        if (exceptAttrs.indexOf(attr.name) === -1) {
-                            el.removeAttribute(attr.name);
-                        }
-                    }
-                }
-            }
-        });
-
-        // On débale tous les éléments, sauf certains dont on veut conserver le tag.
-        var
-            selector = 
-                '*:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6)' +
-                ':not(p):not(blockquote):not(ul):not(ol):not(li):not(hr):not(br):not(a)' +
-                ':not(i):not(em):not(b):not(strong):not(u):not(mark):not(sup):not(sub):not(code)',
-            elements = virtualDiv.querySelectorAll(selector),
-            el, parent;
-        
-        for (var i = 0, nb = elements.length; i < nb; i++) { 
-            el = elements[i];
-            parent = el.parentNode;
-            while (el.firstChild) parent.insertBefore(el.firstChild, el);
-            parent.removeChild(el);
-        }
-        
-        console.log(virtualDiv.innerHTML);
-        */
-        /*
-            Conversion des balises HTML inlines en PBML.
-            Il serait bien d'avoir une constante 'correspondanceTable' pour
-            clarifier les choses. Il y a déjà ceci dans converter.js sous le
-            nom de 'var equiv'.
-        */
-        /*var
-            txt = virtualDiv.innerHTML,
-            simplesInlineTags = [
-                'i', 'em', 'b', 'strong', 'u', 'mark', 'sup', 'sub', 'code'
-            ],
-            simplesInlineMarks = [
-                '\'', '\'', '*', '*', '|', '_', '^', ',', '`'
-            ],
-            tag,
-            char,
-            regex;
-        
-        for (var i = 0, nb = simplesInlineMarks.length; i < nb; i++) {
-            tag = simplesInlineTags[i];
-            char = simplesInlineMarks[i];
-            regex = new RegExp('<' + tag + '>(.*?)<\/' + tag + '>', 'ig');
-            txt = txt.replace(regex, char + char + '$1' + char + char);        
-        }
-        
-        */
-        //améliorer cette partie sérieusement :
-        /*
-            - il n'y a pas que le &nbsp; à remplacer
-            - en plus des liens, il y a les notes et les images
-        */
-        /*txt = txt
-            .replace(/<a href="(.*?)">(.*?)<\/a>/ig, '[[$2|$1]]')
-            .replace(/&nbsp;/g, ' ')
-            .trim();
-        
-        console.log(txt);
-        
-        var
-            nodes = parseHTML(txt),
-            node,
-            tag,
-            tab_disc = [],
-            regex = /^[—–-]\s/g,
-            HTMLEl = [];
-        
-        if (nodes.length === 0) { //on n'a pas un noeud de type bloc mais un simple contenu inline
-            currentBlock = app.currentBlock[0];
-            caret = caretInfos(currentBlock);
-            debText = currentBlock.innerHTML.substring(0, caret.start);
-            endText = currentBlock.innerHTML.substring(caret.end);
-            
-            currentBlock.innerHTML = debText + txt + endText;
-            
-            cursorPlace = currentBlock.innerHTML.length - endText.length;
-            setCaret(currentBlock, {start: cursorPlace, end: cursorPlace}); //merde quand le curseur est après un br dans le bloc
-            caretMoved();
-            
-            return;
-        }
-        
-        console.log(nodes); // J'EN SUIS ICIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-        for (var i = 0, nb = nodes.length; i < nb; i++) {
-            node = nodes[i];
-            tag = node.localName;
-            innerHTML = node.innerHTML.trim();
-            if (/^[—–-]\s/g.test(innerHTML)) {
-                tab_disc.push(innerHTML.replace(/^[—–-]\s/g, ''));
-                for (i = i; (i < nb - 1) && (/^[—–-]\s/g.test(nodes[i].nextSibling.innerHTML)); i++) {
-                    tab_disc.push(nodes[i+1].innerHTML.trim().replace(/^[—–-]\s/g, ''));
-                }
-                console.log(tab_disc);
-                tab_disc = tab_disc.map(function (el, i) {
-                    return ['<p>', el, '</p>'].join('');
-                });
-                HTMLEl.push('<div>' + tab_disc.join('') + '</div>');
-                console.log('<div>' + tab_disc.join('') + '</div>');
-                tab_disc = [];
-            } else {
-                HTMLEl.push('<'+tag+'>' + innerHTML + '</'+tag+'>');
-            }
-            
-        }
-
-        htmlObj = parseHTML(HTMLEl.join(''));
-
-        var node, nodeName, textContent, innerHTML, contents = [];
-        for (var i = 0, nb = htmlObj.length; i < nb; i++) {
-            node = htmlObj[i];
-            nodeName = node.nodeName;
-            textContent = node.textContent;
-            innerHTML = node.innerHTML;
-            
-            switch (true) {                    
-                case nodeName === 'P':
-                    if (textContent !== '' 
-                        && !/^\s*$/.test(textContent) 
-                        && !/^\/\/\/$/.test(textContent)
-                    ) {
-                        contents.push(textContent);
-                    }
-                    break;
-                    
-                case nodeName === 'DIV':
-                    var elts = parseHTML(innerHTML), tabReplics = [];
-                    for (var j = 0, nbElts = elts.length; j < nbElts; j++) {
-                        tabReplics.push('- ' + elts[j].textContent);
-                    }
-                    contents.push(tabReplics.join('\n'));
-				    break;
-                    
-                case /^H[1-6]$/i.test(nodeName):
-				    var
-                        lvl = parseInt(nodeName.substring(1)),
-                        type = new Array(lvl + 1).join('=');
-                    contents.push(type + ' ' + textContent);
-				    break;
-                    
-                case nodeName === 'HR':
-                    contents.push('---');
-				    break;
-                    
-                case /^[UO]L$/i.test(nodeName):
-                    //todo (evolution) : multi levels + ul/ol distinction
-                    var
-                        tabLi = node.childNodes,
-                        items = [],
-                        nb = tabLi.length,
-                        el = '';
-                    
-                    for (var j = 0; j < nb; j++) {
-                        items.push('* ' + tabLi[j].textContent);
-                    }
-                    contents.push(items.join('\n'));
-                    break;
-                
-                default: //tout devient p
-                    if (textContent !== '' 
-                        && !/^\s*$/.test(textContent) 
-                        && !/^\/\/\/$/.test(textContent)
-                    ) {
-                        contents.push(textContent);
-                    }
-                    break;
-            }
-        }
-    }
-    return contents || [];
-    */
-    
-    
-    
 
 }, false);
 
@@ -2507,7 +2288,33 @@ app.btExportOdt.addEventListener('click', saveTextAsOdt, false);
 //localStorage.clear();
 app.btCompose.click();
 
-/*
-    on ne veut jamais de bloc vide dans le ls :
-    -> un bloc vide disparait du dom et du ls (s'il y est) s'il perd le focus
-*/
+//nav top bottom
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+    var timer = null;
+    
+    function topBottomShowing() {
+        if (timer !== null) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function () {
+            // do something
+            var top = document.documentElement.scrollTop || document.body.scrollTop;
+            btTop.classList.toggle('unactive', top < 1);
+            btBottom.classList.toggle('unactive', top + window.innerHeight === document.body.scrollHeight);
+        }, 300);
+    }
+
+    window.addEventListener('load', topBottomShowing, false);
+    window.addEventListener('scroll', topBottomShowing, false);
+
+    btTop.onclick = function () {
+        window.scroll(0, 0);
+        this.classList.add('unactive');
+    };
+
+    btBottom.onclick = function () {
+        window.scroll(0, document.body.scrollHeight);
+        this.classList.add('unactive');
+    };
+});

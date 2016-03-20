@@ -151,10 +151,14 @@ img.imgRight {
     right: 10px;
     bottom: 10px;
 }
-#nav2 a{
+#nav2 span{
     color: #333;
     text-decoration: none;
     display: block;
+    padding: 2px;
+}
+.unactive {
+    opacity: .3;
 }
 .bt::before {
     content: '>';
