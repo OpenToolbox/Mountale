@@ -248,7 +248,7 @@ function generateHTML() {
     if (app.htmlOptsCredits.checked) {
         creditsBlock = document.createElement('p');
         creditsBlock.className = 'credits';
-        creditsBlock.innerHTML = 'Rédigé avec <a href=http://mountale.xyz title="Application d’écriture opensource"><em>Mountale</em></a>.';
+        creditsBlock.innerHTML = "Rédigé avec <a href=http://mountale.xyz title='Application d’écriture opensource'><em>Mountale</em></a>.";
         article.appendChild(creditsBlock);
     }
 
@@ -971,10 +971,11 @@ var convert = {
             */
 
             //ml = ml.replace(/\s([;!?]){1}/g, '&#8239;$1'); //vrai espace fine insécable
-            ml = ml.replace(/\s([;!?]){1}/g, '<span style="font-size: 0.67em">&nbsp;</span>$1'); //fausse espace fine insécable, mais compatible partout. La vrai espace fine insécable ne veut pas fonctionner lors de l'export HTML actuel.
+            ml = ml.replace(/\s([;!?]){1}/g, '<span class=thinkNbsp>&nbsp;</span>$1'); //fausse espace fine insécable, mais compatible partout. La vrai espace fine insécable ne veut pas fonctionner lors de l'export HTML actuel.
 
             ml = ml.replace(/\s([:»%]){1}/g, '&nbsp;$1');
             ml = ml.replace(/\s(«){1}\s*/g, ' $1&nbsp;');
+            ml = ml.replace(/–\s(.*?)\s–/g, '–&nbsp;$1&nbsp;–');
 
             //voir pour les demi cadratin
             ml = ml.trim();
@@ -1921,7 +1922,6 @@ app.compose.addEventListener('input', function () {
         blocks.push(node);
     }
     localStorage.setItem(uuid + '.blocks', JSON.stringify(blocks));
-    console.log('push in LS : blocks', JSON.stringify(blocks));
 }, false);
 app.compose.addEventListener('click', function (e) {
     caretMoved();
@@ -2035,6 +2035,7 @@ app.compose.addEventListener('paste', function (e) {
                 } else {
                     idMax ++;
                     element.id = idMax;
+                    localStorage.setItem(app.currentDoc + '.idMax', idMax);
                 }
                 console.log(element);
             }
@@ -2238,6 +2239,7 @@ app.compose.addEventListener('paste', function (e) {
             node.innerHTML = lines[i];
             node.id = idMax;
             app.compose.insertBefore(node, currentBlock.nextSibling);
+            localStorage.setItem(app.currentDoc + '.idMax', idMax);
         }
         
         currentBlock = node;
