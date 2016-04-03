@@ -28,8 +28,8 @@ body {
     padding: 40px;
     margin: 0 auto;
     width: 100%;
-    max-width: 650px;
-    background: #eee;
+    max-width: 700px;
+    background: #F9F9F9;
     color: #222;
     font-family: georgia, serif;
 }
@@ -94,9 +94,7 @@ h6 {
     text-align: center;
     margin: 0;
 }
-#htmlPreview figure img {
-    width: 100%;
-}
+
 #htmlPreview sup a {
     text-decoration: none;
 }
@@ -130,7 +128,8 @@ pre code {
 }*/
 
 img {
-    width: 33%;
+    max-width: 100%;
+    padding: 2px;
 }
 img.imgLeft {
     float: left !important;
@@ -139,6 +138,18 @@ img.imgLeft {
 img.imgRight {
     float: right !important;
     padding: 5px 0 5px 10px !important;
+}
+img.imgWidth25 {
+    width: 25%;
+}
+img.imgWidth33 {
+    width: 33.3334%;
+}
+img.imgWidth50 {
+    width: 50%;
+}
+img.imgWidth75 {
+    width: 75%;
 }
 #nav {
     color: #000;
@@ -163,15 +174,17 @@ img.imgRight {
 .unactive {
     opacity: .3;
 }
-.bt::before {
-    content: '>';
-}
+
 .bt {
-    padding-right: 15px;
+    margin-bottom: 10px;
+    padding: 2px 4px;
     cursor: pointer;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px #ccc;
+    display: inline-block;
 }
 .bt:hover {
-    color: purple;
+    box-shadow: 0px 0px #ccc;
 }
 #compose {
     font-family: monospace, sans-serif;

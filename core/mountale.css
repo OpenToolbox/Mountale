@@ -1,0 +1,134 @@
+/*
+Note pour débutants : le contenu de ce fichier permet de mettre en forme le HTML du document créé avec Mountale.
+Il se compose de deux rubriques : BLOCS et TEXTE. La première correspond aux blocs que l'on peut créer avec Mountale 
+et la seconde permet de mettre en forme le texte à l'intérieur des blocs. Tous les styles ici présents ne sont pas 
+forcément utiles. Par exemple, si aucune citation n'est présente dans le HTML, alors la partie "blockquote" peut 
+être entièrement enlevée. Dans l'idéal, il faut ajouter une classe à la balise "article" dans le HTML que tu exportes, 
+et pour chaque sélecteur CSS, il faut indiquer cette classe. Démonstration :
+1 - Dans le HTML, remplacer ceci "<article>" par "<article class=mesArticles>".
+2 - Dans le CSS, ajouter ".mesArticles" devant chaque sélecteur (exemple : .mesArticles h1 {...} ou .mesArticles p.poem {...}, etc.
+Enfin, ce code CSS s'insère dans le code CSS d'un blog ou d'un quelconque site.
+Besoin de plus d'aide ? Écris-moi sur contact@mountale.xyz.
+*/
+
+/*----------------------BLOCS------------------------*/
+
+/* Titres */
+h1,h2,h3,h4,h5,h6 { text-align: center; }
+h1 { font-size: 2em; }
+h2 { font-size: 1.7em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.3em; }
+h5 { font-size: 1.1em; }
+h6 { font-size: 1em; }
+
+/* Paragraphe simple */
+p {
+    text-indent: 1em;
+    text-align: justify;
+}
+
+/* Paragraphe de type poème */
+p.poem { text-indent: 0; }
+
+/* Conversation */
+p.disc_alpha { margin-bottom: 0; }
+p.disc_inter { margin-top: 0; margin-bottom: 0;	}
+p.disc_omega { margin-top: 0; }
+
+/*
+    Ligne horizontale.
+    Remplacer 'img/mon_image.jpg' par une vraie image.
+    Si une simple ligne est souhaitée, supprimer tout le hr
+*/
+hr {
+    height: 40px;
+    background: url(img/mon_image.jpg) no-repeat center !important;
+    border: none !important;
+}
+
+/* Citation. */  
+blockquote {
+    border-left: 5px solid #C7CACC;
+    padding: 0px 15px;
+    margin-left: 15px;
+    margin-right: 0;
+}
+footer {
+    background: #C7CACC;
+    padding: 4px 10px 4px 10px;
+    display: inline-block;
+}
+
+/* Code en bloc (pas encore disponible dans l'application) */
+pre code {
+    background: none;
+    border: none;
+}
+
+/* Figure */
+figure {
+    font-size: .85em;
+    text-align: center;
+    margin: 0;
+}
+
+/* Tableau */
+table {
+    border-collapse: collapse;
+}
+th {
+    background: #CCC;
+    border: 1px solid black;
+    padding: 20px;
+}
+tr:nth-child(odd) {
+    background: #E4E5EA;
+}
+td {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Image (dans figure ou non) */
+img {
+    max-width: 100%;
+    padding: 2px;
+}
+img.imgLeft {
+    float: left !important;
+    padding: 5px 10px 5px 0 !important;
+}
+img.imgRight {
+    float: right !important;
+    padding: 5px 0 5px 10px !important;
+}
+img.imgWidth25 {
+    width: 25%;
+}
+img.imgWidth33 {
+    width: 33.3334%;
+}
+img.imgWidth50 {
+    width: 50%;
+}
+img.imgWidth75 {
+    width: 75%;
+}
+
+
+/*----------------------TEXTE------------------------*/
+
+/* surlignage */
+mark { background: #75ffe4; }
+
+/* note de bas de page */
+sup a { text-decoration: none; }
+
+/* lien */
+a {
+    color: #d01616;
+    cursor: pointer;
+}
+a:hover { color: #000; }
