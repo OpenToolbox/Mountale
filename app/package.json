@@ -1,0 +1,13 @@
+{
+  "name": "mountale",
+  "version": "0.7.0",
+  "description": "",
+  "author": {
+    "name": "Ench",
+    "email": "ench@ntymail.com"
+  },
+  "license": "AGPL3",
+  "private": true,
+  "homepage": "https://github.com/OpenToolbox/Mountale.git#readme",
+  "main": "./electron.js"
+}

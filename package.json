@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "postinstall": "install-app-deps",
+    "start": "electron ./app",
+    "pack": "build --platform all",
+    "dist": "build --platform all"
+  },
+  "build": {
+    "compression": "maximum",
+    "app-bundle-id": "mountale",
+    "app-category-type": "public.app-category.writing",
+    "iconUrl": "https://github.com/OpenToolbox/Mountale.git/build/icon.ico"
+  },
+  "devDependencies": {
+    "electron-builder": "^3.4.0",
+    "electron-packager": "^6.0.1",
+    "electron-prebuilt": "^0.37.0"
+  }
+}
