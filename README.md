@@ -25,4 +25,29 @@ Une documentation complète sera prochainement disponible.
 
 # Développeurs
 
-L'application dispose d'une bonne part de javascript pur (vanilla JS). Le dossier core contient tous les fichiers nécessaires à l'amélioration de l'application. Mountale est sous licence AGPLv3 et qui veut participer à son développement peut me le faire savoir.
+L'application dispose d'une bonne part de javascript pur (vanilla JS). Le dossier app/browser/core contient tous les fichiers nécessaires à l'amélioration de l'application. Mountale est sous licence AGPLv3 et qui veut participer à son développement peut me le faire savoir.
+
+## Dependencies
+
+To run mountale in development you need to install **Node.js** and **npm** : https://nodejs.org.
+
+Electron 0.37 is required :
+
+    $ npm install -g electron-prebuilt@0.37
+
+## Installation
+
+    $ git clone https://github.com/opentoolbox/mountale.git
+    $ cd mountale
+    $ npm install
+
+## Run Mountale
+
+    $ npm start
+
+## Build Mountale
+
+To build mountale with [electron-builder](https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build) you need to [install required system packages](https://github.com/electron-userland/electron-builder/wiki/Multi-Platform-Build).
+
+    $ npm run pack
+    $ npm run dist
